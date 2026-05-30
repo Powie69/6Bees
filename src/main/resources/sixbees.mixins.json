@@ -1,9 +1,9 @@
 {
   "required": true,
-  "package": "com.example.addon.mixin",
+  "package": "powie.sixbees.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "ExampleMixin"
+    "MixinExplosion"
   ],
   "injectors": {
     "defaultRequire": 1

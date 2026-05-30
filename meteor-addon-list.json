@@ -1,0 +1,17 @@
+{
+  "features_directories": {
+    "commands": [
+      "commands"
+    ],
+    "modules": [
+      "modules"
+    ]
+  },
+  "supported_versions": [
+    "26.1.2"
+  ],
+  "tags": [
+    "Utility",
+    "6b6t"
+  ]
+}

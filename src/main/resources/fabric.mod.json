@@ -1,31 +1,38 @@
 {
   "schemaVersion": 1,
-  "id": "addon-template",
+  "id": "sixbees",
   "version": "${version}",
-  "name": "Addon Template",
-  "description": "An addon template for Meteor Client addons.",
+  "name": "6Bees",
+  "description": "Meteor Addon specifically made for 6b6t.org ",
   "authors": [
-    "seasnail"
+    "Powie69"
   ],
   "contact": {
-    "sources": "https://github.com/MeteorDevelopment/meteor-addon-template"
+    "homepage": "https://github.com/Powie69/6Bees",
+    "issues": "https://github.com/Powie69/6Bees/issues",
+    "repo": "https://github.com/Powie69/6Bees",
+    "sources": "https://github.com/Powie69/6Bees"
   },
-  "icon": "assets/template/icon.png",
+  "icon": "assets/sixbees/icon.png",
   "environment": "client",
   "entrypoints": {
     "meteor": [
-      "com.example.addon.AddonTemplate"
+      "powie.sixbees.SixBees"
     ]
   },
   "mixins": [
-    "addon-template.mixins.json"
+    "sixbees.mixins.json"
   ],
   "custom": {
-    "meteor-client:color": "225,25,25",
+    "meteor-client:color": "255,206,43",
     "modmenu": {
-      "parent": {
-        "id": "meteor-client"
-      }
+      "issues": "https://github.com/Powie69/6Bees/issues",
+      "links": {
+        "modmenu.github_releases": "https://github.com/Powie69/6Bees/releases",
+        "modmenu.kofi": "Powie_"
+      },
+      "source": "https://github.com/Powie69/6Bees",
+      "website": "https://github.com/Powie69/6Bees"
     }
   },
   "depends": {
