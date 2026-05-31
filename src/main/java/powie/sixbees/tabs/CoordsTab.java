@@ -69,15 +69,15 @@ public class CoordsTab extends Tab {
         @Override
         public void initWidgets() {
 
-            WHorizontalList axisList = add(theme.horizontalList()).minWidth(350).expandX().widget();
+            WHorizontalList axisList = add(theme.horizontalList()).minWidth(350).widget();
             WVerticalList list = add(theme.verticalList()).minWidth(350).expandX().widget();
             // X coordinate
             axisList.add(theme.label("X:"));
-            xInput = axisList.add(theme.intEdit(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, 0, true)).expandX().widget();
+            xInput = axisList.add(theme.intEdit(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, 0, true)).widget();
 
             // Z coordinate
             axisList.add(theme.label("Z:"));
-            zInput = axisList.add(theme.intEdit(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, 0, true)).expandX().widget();
+            zInput = axisList.add(theme.intEdit(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, 0, true)).widget();
 
             // Radius
             list.add(theme.label("Radius:"));
