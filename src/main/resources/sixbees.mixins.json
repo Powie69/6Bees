@@ -3,7 +3,8 @@
   "package": "powie.sixbees.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "MixinExplosion"
+    "MixinExplosion",
+    "ServerboundCustomPayloadPacket"
   ],
   "injectors": {
     "defaultRequire": 1

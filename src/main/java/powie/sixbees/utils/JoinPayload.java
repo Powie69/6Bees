@@ -6,7 +6,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
 public class JoinPayload implements CustomPacketPayload {
-
     public static final Identifier ID = Identifier.fromNamespaceAndPath("anarchymod", "join");
 
     public static final StreamCodec<FriendlyByteBuf, JoinPayload> CODEC =

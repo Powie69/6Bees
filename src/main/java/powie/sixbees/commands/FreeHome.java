@@ -15,7 +15,7 @@ public class FreeHome extends Command {
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder.executes(_ -> {
             mc.getConnection().send(new ServerboundCustomPayloadPacket(new JoinPayload()));
-            info("hi");
+            info("Command sent. run /homes to check");
             return SINGLE_SUCCESS;
         });
 
