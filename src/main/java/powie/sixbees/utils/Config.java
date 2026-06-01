@@ -1,23 +1,68 @@
 package powie.sixbees.utils;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
 
 import static powie.sixbees.SixBees.LOG;
 
 public class Config {
     public static final File CONFIG_FOLDER = FabricLoader.getInstance().getGameDir().resolve("6bees").toFile();
 
-    // TODO: future-proof
-    public static void initialize() {
-        File coordsFile = new File(CONFIG_FOLDER, "coords");
-        if (coordsFile.exists()) return;
-        try {
-            coordsFile.createNewFile();
-        } catch (Exception e) {
-            LOG.error("Failed to create config file", e);
+    private static final Set<String> CONFIG_FILES = Set.of(
+        "coords",
+        "maps"
+    );
+
+    public static void initializeConfig() {
+        if (!CONFIG_FOLDER.exists()) {
+            CONFIG_FOLDER.getParentFile().mkdirs();
+            CONFIG_FOLDER.mkdir();
+        }
+        for (String filename : CONFIG_FILES) {
+            createIfAbsent(filename);
         }
     }
+
+    private static void createIfAbsent(String filename) {
+        Path file = CONFIG_FOLDER.toPath().resolve(filename);
+        if (Files.exists(file)) return;
+        try {
+            Files.createFile(file);
+            LOG.info("Created config file: {}", filename);
+        } catch (FileAlreadyExistsException e) {
+            LOG.info("Config file already exists: {}", filename);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create config file: " + filename, e);
+        }
+    }
+
+    public static Set<Integer> readMaps() {
+        Path file = CONFIG_FOLDER.toPath().resolve("maps");
+        if (!Files.exists(file)) return new HashSet<>();
+
+        try {
+            String content = Files.readString(file).trim();
+            if (content.isEmpty()) return new HashSet<>();
+
+            Gson gson = new Gson();
+            Type setType = new TypeToken<HashSet<Integer>>() {}.getType();
+            Set<Integer> result = gson.fromJson(content, setType);
+            return result != null ? result : new HashSet<>();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read maps config", e);
+        }
+    }
+    
+    // todo: Get data from the internet
 }
 

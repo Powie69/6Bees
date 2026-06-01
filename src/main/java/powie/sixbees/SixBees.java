@@ -1,23 +1,19 @@
 package powie.sixbees;
 
 import com.mojang.logging.LogUtils;
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.addons.GithubRepo;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
-import powie.sixbees.commands.FreeHome;
-import powie.sixbees.modules.AdBlock;
-import powie.sixbees.modules.AntiTinnitus;
-import powie.sixbees.modules.ChatLogger;
+import powie.sixbees.commands.GetMapId;
+import powie.sixbees.modules.*;
 import powie.sixbees.tabs.CoordsTab;
-import powie.sixbees.utils.Config;
 
-import static powie.sixbees.utils.Config.CONFIG_FOLDER;
-import static powie.sixbees.utils.Config.initialize;
+import static powie.sixbees.utils.Config.initializeConfig;
 
 public class SixBees extends MeteorAddon {
     public static final Logger LOG = LogUtils.getLogger();
@@ -28,28 +24,23 @@ public class SixBees extends MeteorAddon {
     public void onInitialize() {
         LOG.info("Initializing 6 Bees");
 
-        LOG.info(String.valueOf(MeteorClient.FOLDER));
-        LOG.info(String.valueOf(Config.CONFIG_FOLDER));
+        initializeConfig();
 
-        if (!CONFIG_FOLDER.exists()) {
-            CONFIG_FOLDER.getParentFile().mkdirs();
-            CONFIG_FOLDER.mkdir();
+        if (FabricLoader.getInstance().isDevelopmentEnvironment() || Boolean.getBoolean("sixbees.extra")) {
+            Modules.get().add(new AutoLogin());
+            Modules.get().add(new ChatLogger());
+            Commands.add(new GetMapId());
+            Tabs.add(new CoordsTab());
         }
-        initialize();
 
         // Modules
         Modules.get().add(new AdBlock());
         Modules.get().add(new AntiTinnitus());
-        Modules.get().add(new ChatLogger());
-
-        // commands
-        Commands.add(new FreeHome());
+        Modules.get().add(new FreeHome());
+        Modules.get().add(new NsfwBlock());
 
         // HUD
         // Hud.get().register(HudExample.INFO);
-
-        Tabs.add(new CoordsTab());
-
     }
 
     @Override

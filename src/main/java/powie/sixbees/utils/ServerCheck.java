@@ -15,9 +15,8 @@ public class ServerCheck {
 
     public static boolean is6B6T() {
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) return true; // Bypass check in dev environment
-        if (mc.isSingleplayer()) return false;
         ServerData server = mc.getCurrentServer();
-        if (server == null) return false;
+        if (server == null || server.isLan()) return false;
         String ip = server.ip.split(":")[0].toLowerCase();
         return DOMAINS.stream().anyMatch(d -> ip.equals(d) || ip.endsWith("." + d));
     }

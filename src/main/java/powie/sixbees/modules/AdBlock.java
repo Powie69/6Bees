@@ -45,7 +45,7 @@ public class AdBlock extends Module {
 
     @EventHandler
     private void onMessageReceive(ReceiveMessageEvent event) {
-        if (!filterWithers.get()) return;
+        if (!filterChat.get()) return;
 
         String message = event.getMessage().getString();
 
