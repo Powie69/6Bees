@@ -12,7 +12,7 @@ import powie.sixbees.SixBees;
 import java.util.ArrayList;
 import java.util.List;
 
-import static powie.sixbees.utils.ServerCheck.is6B6T;
+import static powie.sixbees.utils.Checks.is6B6T;
 
 public class AdBlock extends Module {
     private final SettingGroup sgGeneral = this.settings.getDefaultGroup();

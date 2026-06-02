@@ -7,7 +7,7 @@ import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import powie.sixbees.SixBees;
 import powie.sixbees.utils.JoinPayload;
 
-import static powie.sixbees.utils.ServerCheck.is6B6T;
+import static powie.sixbees.utils.Checks.is6B6T;
 
 public class FreeHome extends Module {
     public FreeHome() {

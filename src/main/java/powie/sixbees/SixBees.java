@@ -7,13 +7,13 @@ import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import powie.sixbees.commands.GetMapId;
 import powie.sixbees.modules.*;
 import powie.sixbees.tabs.CoordsTab;
 
 import static powie.sixbees.utils.Config.initializeConfig;
+import static powie.sixbees.utils.Checks.isDevEnvOrHasExtraArgs;
 
 public class SixBees extends MeteorAddon {
     public static final Logger LOG = LogUtils.getLogger();
@@ -26,7 +26,7 @@ public class SixBees extends MeteorAddon {
 
         initializeConfig();
 
-        if (FabricLoader.getInstance().isDevelopmentEnvironment() || Boolean.getBoolean("sixbees.extra")) {
+        if (isDevEnvOrHasExtraArgs()) {
             Modules.get().add(new AutoLogin());
             Modules.get().add(new ChatLogger());
             Commands.add(new GetMapId());
@@ -35,6 +35,7 @@ public class SixBees extends MeteorAddon {
 
         // Modules
         Modules.get().add(new AdBlock());
+        Modules.get().add(new AntiBedTrap());
         Modules.get().add(new AntiTinnitus());
         Modules.get().add(new FreeHome());
         Modules.get().add(new NsfwBlock());

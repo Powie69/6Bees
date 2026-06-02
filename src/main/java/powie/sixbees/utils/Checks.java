@@ -7,7 +7,7 @@ import java.util.Set;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class ServerCheck {
+public class Checks {
     /**
      * <a href="https://github.com/6b6t/AnarchyMod/blob/main/src/main/java/net/blockhost/anarchymod/Domains.java">Source</a>
      */
@@ -19,5 +19,9 @@ public class ServerCheck {
         if (server == null || server.isLan()) return false;
         String ip = server.ip.split(":")[0].toLowerCase();
         return DOMAINS.stream().anyMatch(d -> ip.equals(d) || ip.endsWith("." + d));
+    }
+
+    public static boolean isDevEnvOrHasExtraArgs() {
+        return FabricLoader.getInstance().isDevelopmentEnvironment() || Boolean.getBoolean("sixbees.extra");
     }
 }
