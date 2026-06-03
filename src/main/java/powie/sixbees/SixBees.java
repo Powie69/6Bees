@@ -29,6 +29,7 @@ public class SixBees extends MeteorAddon {
         if (isDevEnvOrHasExtraArgs()) {
             Modules.get().add(new AutoLogin());
             Modules.get().add(new ChatLogger());
+            Modules.get().add(new ToolTipTest());
             Commands.add(new GetMapId());
             Tabs.add(new CoordsTab());
         }

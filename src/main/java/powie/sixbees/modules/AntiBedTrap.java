@@ -34,8 +34,8 @@ public class AntiBedTrap extends Module {
      * @see <a href="https://minecraft.wiki/w/Explosion#Damage">source</a>
      */
     private final Setting<Double> maxDamage = sgGeneral.add(new DoubleSetting.Builder()
-        .name("max-damage-threshold")
-        .description("Will not interact with respawn block if explosion damage of it is greater than this.\n Set to 0 to disable.")
+        .name("max-self-damage-threshold")
+        .description("Will not interact with respawn block if explosion damage of it is greater than this.\nSet to 0 to disable.")
         .defaultValue(1)
         .min(0)
         .max(2048)
@@ -64,7 +64,9 @@ public class AntiBedTrap extends Module {
         if (block instanceof RespawnAnchorBlock) {
             if (allowExplosiveBypass.get() &&
                 mc.level.dimension() != Level.NETHER &&
-                maxDamage.get() > DamageUtils.anchorDamage(mc.player, event.result.getBlockPos().getCenter())) return;
+                maxDamage.get() > DamageUtils.anchorDamage(mc.player, event.result.getBlockPos().getCenter())) {
+                return;
+            }
             event.cancel();
         }
     }
