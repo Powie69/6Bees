@@ -20,8 +20,7 @@ public class Config {
 
     private static final Set<String> CONFIG_FILES = Set.of(
         "coords",
-        "maps",
-        "maps-local"
+        "maps"
     );
 
     public static void initializeConfig() {

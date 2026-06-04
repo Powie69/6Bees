@@ -12,8 +12,8 @@ import powie.sixbees.commands.GetMapId;
 import powie.sixbees.modules.*;
 import powie.sixbees.tabs.CoordsTab;
 
-import static powie.sixbees.utils.Config.initializeConfig;
 import static powie.sixbees.utils.Checks.isDevEnvOrHasExtraArgs;
+import static powie.sixbees.utils.Config.initializeConfig;
 
 public class SixBees extends MeteorAddon {
     public static final Logger LOG = LogUtils.getLogger();
@@ -29,8 +29,6 @@ public class SixBees extends MeteorAddon {
         if (isDevEnvOrHasExtraArgs()) {
             Modules.get().add(new AutoLogin());
             Modules.get().add(new ChatLogger());
-            Modules.get().add(new ToolTipTest());
-            Commands.add(new GetMapId());
             Tabs.add(new CoordsTab());
         }
 
@@ -40,6 +38,9 @@ public class SixBees extends MeteorAddon {
         Modules.get().add(new AntiTinnitus());
         Modules.get().add(new FreeHome());
         Modules.get().add(new NsfwBlock());
+        Modules.get().add(new ShowMapId());
+
+        Commands.add(new GetMapId());
 
         // HUD
         // Hud.get().register(HudExample.INFO);
