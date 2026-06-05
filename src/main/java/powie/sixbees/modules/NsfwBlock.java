@@ -1,18 +1,14 @@
 package powie.sixbees.modules;
 
-import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.orbit.EventHandler;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.decoration.ItemFrame;
 import powie.sixbees.SixBees;
 
 import java.util.Set;
 
+import static powie.sixbees.utils.Checks.isDevEnvOrHasExtraArgs;
 import static powie.sixbees.utils.Config.readMaps;
 
 public class NsfwBlock extends Module {
@@ -33,6 +29,6 @@ public class NsfwBlock extends Module {
 
     @Override
     public void onActivate() {
-        info(NSFW_MAPS.toString());
+        if (isDevEnvOrHasExtraArgs()) info(NSFW_MAPS.toString());
     }
 }

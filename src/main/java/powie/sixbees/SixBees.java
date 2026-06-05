@@ -7,13 +7,18 @@ import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.world.Dimension;
+import net.minecraft.core.BlockPos;
 import org.slf4j.Logger;
 import powie.sixbees.commands.GetMapId;
 import powie.sixbees.modules.*;
 import powie.sixbees.tabs.CoordsTab;
+import powie.sixbees.utils.Config;
+
+import java.util.List;
 
 import static powie.sixbees.utils.Checks.isDevEnvOrHasExtraArgs;
-import static powie.sixbees.utils.Config.initializeConfig;
+import static powie.sixbees.utils.Config.*;
 
 public class SixBees extends MeteorAddon {
     public static final Logger LOG = LogUtils.getLogger();
@@ -25,6 +30,16 @@ public class SixBees extends MeteorAddon {
         LOG.info("Initializing 6 Bees");
 
         initializeConfig();
+        List<Config.Place> places = readPlaces();
+
+        savePlace(new Config.Place("Example Place", new BlockPos(0, 64, 0), 10.0, Dimension.Overworld));
+
+        for (Config.Place place : places) {
+            LOG.info("Place: {}", place.name);
+            LOG.info("  Coords: {}", place.coords);
+            LOG.info("  Radius: {}", place.radius);
+            LOG.info("  Dimension: {}", place.dimension);
+        }
 
         if (isDevEnvOrHasExtraArgs()) {
             Modules.get().add(new AutoLogin());
