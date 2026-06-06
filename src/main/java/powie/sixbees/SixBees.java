@@ -12,10 +12,11 @@ import net.minecraft.core.BlockPos;
 import org.slf4j.Logger;
 import powie.sixbees.commands.GetMapId;
 import powie.sixbees.modules.*;
-import powie.sixbees.tabs.CoordsTab;
-import powie.sixbees.utils.Config;
+import powie.sixbees.tabs.BaseTab;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static powie.sixbees.utils.Checks.isDevEnvOrHasExtraArgs;
 import static powie.sixbees.utils.Config.*;
@@ -30,21 +31,21 @@ public class SixBees extends MeteorAddon {
         LOG.info("Initializing 6 Bees");
 
         initializeConfig();
-        List<Config.Place> places = readPlaces();
+        Map<String, Base> bases = readBases();
 
-        savePlace(new Config.Place("Example Place", new BlockPos(0, 64, 0), 10.0, Dimension.Overworld));
+        saveBase(UUID.randomUUID().toString() ,new Base("Example Place", new BlockPos(0, 64, 0), 10, Dimension.Overworld));
 
-        for (Config.Place place : places) {
-            LOG.info("Place: {}", place.name);
-            LOG.info("  Coords: {}", place.coords);
-            LOG.info("  Radius: {}", place.radius);
-            LOG.info("  Dimension: {}", place.dimension);
+        for (Base base : bases.values()) {
+            LOG.info("Place: {}", base.name);
+            LOG.info("  Coords: {}", base.coords);
+            LOG.info("  Radius: {}", base.radius);
+            LOG.info("  Dimension: {}", base.dimension);
         }
 
         if (isDevEnvOrHasExtraArgs()) {
             Modules.get().add(new AutoLogin());
             Modules.get().add(new ChatLogger());
-            Tabs.add(new CoordsTab());
+            Tabs.add(new BaseTab());
         }
 
         // Modules
