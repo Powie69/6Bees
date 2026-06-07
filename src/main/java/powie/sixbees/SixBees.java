@@ -7,19 +7,13 @@ import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.utils.world.Dimension;
-import net.minecraft.core.BlockPos;
 import org.slf4j.Logger;
 import powie.sixbees.commands.GetMapId;
 import powie.sixbees.modules.*;
 import powie.sixbees.tabs.BaseTab;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import static powie.sixbees.utils.Checks.isDevEnvOrHasExtraArgs;
-import static powie.sixbees.utils.Config.*;
+import static powie.sixbees.utils.Config.initializeConfig;
 
 public class SixBees extends MeteorAddon {
     public static final Logger LOG = LogUtils.getLogger();
@@ -31,16 +25,6 @@ public class SixBees extends MeteorAddon {
         LOG.info("Initializing 6 Bees");
 
         initializeConfig();
-        Map<String, Base> bases = readBases();
-
-        saveBase(UUID.randomUUID().toString() ,new Base("Example Place", new BlockPos(0, 64, 0), 10, Dimension.Overworld));
-
-        for (Base base : bases.values()) {
-            LOG.info("Place: {}", base.name);
-            LOG.info("  Coords: {}", base.coords);
-            LOG.info("  Radius: {}", base.radius);
-            LOG.info("  Dimension: {}", base.dimension);
-        }
 
         if (isDevEnvOrHasExtraArgs()) {
             Modules.get().add(new AutoLogin());
@@ -50,6 +34,7 @@ public class SixBees extends MeteorAddon {
 
         // Modules
         Modules.get().add(new AdBlock());
+        Modules.get().add(new AntiBaseLeak());
         Modules.get().add(new AntiBedTrap());
         Modules.get().add(new AntiTinnitus());
         Modules.get().add(new FreeHome());

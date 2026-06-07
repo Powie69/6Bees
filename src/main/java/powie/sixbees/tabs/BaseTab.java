@@ -15,13 +15,15 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.Dimension;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
+import powie.sixbees.utils.BaseUtils;
+import powie.sixbees.utils.BaseUtils.Base;
 
+import java.util.Comparator;
 import java.util.Map;
 import java.util.UUID;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
-import static powie.sixbees.SixBees.LOG;
-import static powie.sixbees.utils.Config.*;
+import static powie.sixbees.utils.Config.readBases;
 
 public class BaseTab extends Tab {
     public BaseTab() {
@@ -39,21 +41,15 @@ public class BaseTab extends Tab {
     }
 
     private static class BaseTabScreen extends WindowTabScreen {
-        private final BaseTabSettings settings;
         private Map<String, Base> bases;
 
         public BaseTabScreen(GuiTheme theme, Tab tab) {
             super(theme, tab);
             this.bases = readBases();
-            settings = new BaseTabSettings();
         }
 
         @Override
         public void initWidgets() {
-            add(theme.settings(settings.settings)).expandX();
-
-            add(theme.horizontalSeparator("Bases")).expandX();
-
             WTable table = add(theme.table()).expandX().minWidth(400).widget();
             initTable(table);
 
@@ -66,24 +62,31 @@ public class BaseTab extends Tab {
         private void initTable(WTable table) {
             table.clear();
 
-            for (Map.Entry<String, Base> entry : bases.entrySet()) {
-                String BaseKey = entry.getKey();
-                Base baseValue = entry.getValue();
-
-                table.add(theme.label(baseValue.name));
-
-                WButton edit = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().right().widget();
-                edit.action = () -> {
-                    mc.setScreen(new AddBaseScreen(theme, baseValue, BaseKey, this));
-                };
-                WConfirmedMinus delete = table.add(theme.confirmedMinus()).right().widget();
-                delete.action = () -> {
-                    removeBase(BaseKey);
-                    reload();
-                };
-
-                table.row();
+            if (bases.isEmpty()) {
+                table.add(theme.label("No bases yet")).expandX();
+                return;
             }
+
+            bases.entrySet().stream()
+                .sorted(Comparator.comparing(v -> v.getValue().name))
+                .forEach(entry -> {
+                    String BaseKey = entry.getKey();
+                    BaseUtils.Base baseValue = entry.getValue();
+
+                    table.add(theme.label(baseValue.name));
+
+                    WButton edit = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().right().widget();
+                    edit.action = () -> {
+                        mc.setScreen(new AddBaseScreen(theme, baseValue, BaseKey, this));
+                    };
+                    WConfirmedMinus delete = table.add(theme.confirmedMinus()).right().widget();
+                    delete.action = () -> {
+                        BaseUtils.removeBase(BaseKey);
+                        reload();
+                    };
+
+                    table.row();
+                });
         }
 
         @Override
@@ -94,19 +97,6 @@ public class BaseTab extends Tab {
         }
     }
 
-    // Might remove this and put the setting in each respective feature that uses this system
-    private static class BaseTabSettings {
-        public final Settings settings = new Settings();
-        private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-        private final Setting<Boolean> allowFriends = sgGeneral.add(new BoolSetting.Builder()
-            .name("Allow-friends")
-            .description("Allow friends")
-            .defaultValue(false)
-            .build()
-        );
-    }
-
     private static class AddBaseScreen extends WindowScreen {
         private final AddBaseSettings settings;
         private final boolean isEdit;
@@ -115,7 +105,7 @@ public class BaseTab extends Tab {
         private final BaseTabScreen parent;
 
         public AddBaseScreen(GuiTheme theme, Base base, String baseId, BaseTabScreen parent) {
-            super(theme, base != null ? "Edit \"" + base.name + "\""  : "New Place");
+            super(theme, base != null ? "Edit \"" + base.name + "\"" : "New Place");
             this.isEdit = base != null;
             this.parent = parent;
             this.base = base;
@@ -148,7 +138,7 @@ public class BaseTab extends Tab {
         }
 
         private void saveCoords() {
-            saveBase(baseId,
+            BaseUtils.saveBase(baseId,
                 new Base(settings.name.get().trim(), settings.coords.get(), settings.radius.get(), settings.dimension.get()));
             parent.reload();
             mc.setScreen(parent);
@@ -163,6 +153,7 @@ public class BaseTab extends Tab {
             .name("name")
             .description("The name of the location.")
             .placeholder("My secret base")
+            .filter((text, _) -> (text.length() < 50))
             .build()
         );
 
@@ -184,7 +175,7 @@ public class BaseTab extends Tab {
 
         public Setting<Dimension> dimension = sgGeneral.add(new EnumSetting.Builder<Dimension>()
             .name("dimension")
-            .description("Which dimension the base is in.")
+            .description("Which dimension the location is in.")
             .defaultValue(Dimension.Overworld)
             .build()
         );

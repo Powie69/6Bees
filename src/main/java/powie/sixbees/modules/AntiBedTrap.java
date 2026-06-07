@@ -14,8 +14,17 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
 import powie.sixbees.SixBees;
 
+import static powie.sixbees.utils.BaseUtils.isInBase;
+
 public class AntiBedTrap extends Module {
     private final SettingGroup sgGeneral = this.settings.getDefaultGroup();
+
+    private final Setting<Boolean> allowInBase = sgGeneral.add(new BoolSetting.Builder()
+        .name("allow-in-base")
+        .description("Allows interaction with respawn blocks if you are in a base")
+        .defaultValue(true)
+        .build()
+    );
 
     private final Setting<Boolean> allowExplosiveBypass = sgGeneral.add(new BoolSetting.Builder()
         .name("allow-explosive-bypass")
@@ -31,6 +40,7 @@ public class AntiBedTrap extends Module {
      * when the explosion is fully blocked.</b> The only exceptions are invulnerable entities, Nether stars, and Peaceful
      * players.
      * </blockquote>
+     *
      * @see <a href="https://minecraft.wiki/w/Explosion#Damage">source</a>
      */
     private final Setting<Double> maxDamage = sgGeneral.add(new DoubleSetting.Builder()
@@ -44,7 +54,6 @@ public class AntiBedTrap extends Module {
         .build()
     );
 
-    // todo: integrate with coords. interact with beds if in coords range
     public AntiBedTrap() {
         super(SixBees.CATEGORY, "anti-bed-trap", "Prevents you from interacting with any respawn blocks");
     }
@@ -53,6 +62,7 @@ public class AntiBedTrap extends Module {
     private void onInteractBlock(InteractBlockEvent event) {
         Block block = mc.level.getBlockState(event.result.getBlockPos()).getBlock();
         if (block instanceof BedBlock) {
+            if (allowInBase.get() && isInBase(mc.player.blockPosition())) return;
             if (allowExplosiveBypass.get() &&
                 mc.level.dimension() != Level.OVERWORLD &&
                 maxDamage.get() > DamageUtils.bedDamage(mc.player, event.result.getBlockPos().getCenter())) {
@@ -62,6 +72,7 @@ public class AntiBedTrap extends Module {
             return;
         }
         if (block instanceof RespawnAnchorBlock) {
+            if (allowInBase.get() && isInBase(mc.player.blockPosition())) return;
             if (allowExplosiveBypass.get() &&
                 mc.level.dimension() != Level.NETHER &&
                 maxDamage.get() > DamageUtils.anchorDamage(mc.player, event.result.getBlockPos().getCenter())) {

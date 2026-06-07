@@ -3,16 +3,18 @@ package powie.sixbees.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
-import meteordevelopment.meteorclient.utils.world.Dimension;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.core.BlockPos;
+import powie.sixbees.utils.BaseUtils.Base;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static powie.sixbees.SixBees.LOG;
 
@@ -79,60 +81,31 @@ public class Config {
             String content = Files.readString(file).trim();
             if (content.isEmpty()) return new HashMap<>();
 
-            Type type = new TypeToken<HashMap<String, Base>>() {}.getType();
+            Type type = new TypeToken<HashMap<String, Base>>() {
+            }.getType();
             Map<String, Base> result = new Gson().fromJson(content, type);
 
             return result != null ? result : new HashMap<>();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException("Failed to read bases config", e);
-        }
-        catch (JsonParseException e) {
+        } catch (JsonParseException e) {
             LOG.error("Failed to parse bases config", e);
             return new HashMap<>();
         }
     }
 
-    private static void writeBases(Map<String, Base> bases) {
+    public static void writeBases(Map<String, Base> bases) {
         Path file = CONFIG_FOLDER.resolve("bases");
-        if (!Files.exists(file)) throw new RuntimeException("Places file does not exist");
+        if (!Files.exists(file)) throw new RuntimeException("Bases file does not exist");
 
         try {
-            Gson gson = new Gson();
-
-            String json = gson.toJson(bases);
-
+            String json = new Gson().toJson(bases);
             Files.writeString(file, json);
         } catch (IOException e) {
             throw new RuntimeException("Failed to save bases config", e);
         }
     }
 
-    public static void saveBase(String key, Base base) {
-        Map<String, Base> bases = readBases();
-        bases.put(key, base);
-        writeBases(bases);
-    }
-
-    public static void removeBase(String key) {
-        Map<String, Base> bases = readBases();
-        bases.remove(key);
-        writeBases(bases);
-    }
-
-    public static class Base {
-        public String name;
-        public BlockPos coords;
-        public int radius;
-        public Dimension dimension;
-
-        public Base(String name, BlockPos Coords, int radius, Dimension dimension) {
-            this.name = name;
-            this.coords = Coords;
-            this.radius = radius;
-            this.dimension = dimension;
-        }
-    }
 
     // todo: Get data from the internet
 }
