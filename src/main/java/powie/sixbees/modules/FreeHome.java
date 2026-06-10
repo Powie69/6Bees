@@ -14,13 +14,12 @@ public class FreeHome extends Module {
         super(SixBees.CATEGORY, "Free-Home", "Gives you 2 extra homes.");
     }
 
+    /**
+     * A GameJoinedEvent event handler is not needed because this method runs every GameJoinedEvent
+     * @see meteordevelopment.meteorclient.systems.modules.Modules#onGameJoined(GameJoinedEvent)
+     */
     @Override
     public void onActivate() {
-        if (is6B6T()) mc.getConnection().send(new ServerboundCustomPayloadPacket(new JoinPayload()));
-    }
-
-    @EventHandler
-    private void onGameJoined(GameJoinedEvent event) {
         if (is6B6T()) mc.getConnection().send(new ServerboundCustomPayloadPacket(new JoinPayload()));
     }
 }

@@ -1,12 +1,15 @@
 package powie.sixbees.modules;
 
-import meteordevelopment.meteorclient.events.game.SendMessageEvent;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import powie.sixbees.SixBees;
+import powie.sixbees.utils.BaseUtils;
 
 public class AntiBaseLeak extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -37,12 +40,29 @@ public class AntiBaseLeak extends Module {
     }
 
     @EventHandler
-    private void onMessageSend(SendMessageEvent event) {
-        String message = event.message;
+    private void onSendPacket(PacketEvent.Send event) {
+        if (!(event.packet instanceof ServerboundChatCommandPacket p)) return;
+        String command = p.command().toLowerCase();
+        String[] parts = command.split(" ");
+        String secondArgument = parts.length > 1 ? parts[1].toLowerCase() : "";
 
-        info(message);
+        if (preventTpa.get() && command.startsWith("tpy") && !secondArgument.isEmpty()) {
+            if (allowFriendsTpa.get() && Friends.get().get(secondArgument) != null) return;
+            if (!BaseUtils.isInBase(mc.player.blockPosition())) return;
+            // Don't print message if player ins't valid (not online). In my opinion it's bad ux
+            if (mc.getConnection().getPlayerInfoIgnoreCase(secondArgument) == null) return;
+            event.cancel();
+            info("Prevented tpa accept from " + secondArgument);
+        }
 
+        if (preventHotspot.get() &&
+            command.startsWith("hotspot") &&
+            secondArgument.equals("create") &&
+            BaseUtils.isInBase(mc.player.blockPosition())) {
+            //
+            event.cancel();
+            info("Prevented hotspot creation");
+        }
     }
-
 
 }

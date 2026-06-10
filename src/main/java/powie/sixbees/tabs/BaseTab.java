@@ -63,7 +63,7 @@ public class BaseTab extends Tab {
             table.clear();
 
             if (bases.isEmpty()) {
-                table.add(theme.label("No bases yet")).expandX();
+                table.add(theme.label("No bases yet")).expandX().pad(10);
                 return;
             }
 
@@ -71,7 +71,7 @@ public class BaseTab extends Tab {
                 .sorted(Comparator.comparing(v -> v.getValue().name))
                 .forEach(entry -> {
                     String BaseKey = entry.getKey();
-                    BaseUtils.Base baseValue = entry.getValue();
+                    Base baseValue = entry.getValue();
 
                     table.add(theme.label(baseValue.name));
 

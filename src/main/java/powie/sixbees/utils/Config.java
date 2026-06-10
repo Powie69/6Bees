@@ -20,6 +20,7 @@ import static powie.sixbees.SixBees.LOG;
 
 public class Config {
     private static final Path CONFIG_FOLDER = FabricLoader.getInstance().getGameDir().resolve("6bees");
+    private static final Gson GSON = new Gson();
 
     private static final Set<String> CONFIG_FILES = Set.of(
         "bases",
@@ -27,9 +28,10 @@ public class Config {
     );
 
     public static void initializeConfig() {
-        if (!CONFIG_FOLDER.toFile().exists()) {
-            CONFIG_FOLDER.getParent().toFile().mkdirs();
-            CONFIG_FOLDER.toFile().mkdir();
+        try {
+            Files.createDirectories(CONFIG_FOLDER);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create config folder", e);
         }
         for (String filename : CONFIG_FILES) {
             createIfAbsent(filename);
@@ -61,7 +63,7 @@ public class Config {
 
             Type setType = new TypeToken<HashSet<Integer>>() {
             }.getType();
-            Set<Integer> result = new Gson().fromJson(content, setType);
+            Set<Integer> result = GSON.fromJson(content, setType);
             return result != null ? result : new HashSet<>();
         } catch (IOException e) {
             throw new RuntimeException("Failed to read maps config", e);
@@ -83,7 +85,7 @@ public class Config {
 
             Type type = new TypeToken<HashMap<String, Base>>() {
             }.getType();
-            Map<String, Base> result = new Gson().fromJson(content, type);
+            Map<String, Base> result = GSON.fromJson(content, type);
 
             return result != null ? result : new HashMap<>();
         } catch (IOException e) {
@@ -99,7 +101,7 @@ public class Config {
         if (!Files.exists(file)) throw new RuntimeException("Bases file does not exist");
 
         try {
-            String json = new Gson().toJson(bases);
+            String json = GSON.toJson(bases);
             Files.writeString(file, json);
         } catch (IOException e) {
             throw new RuntimeException("Failed to save bases config", e);
