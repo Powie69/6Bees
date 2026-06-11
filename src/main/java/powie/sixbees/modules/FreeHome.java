@@ -15,7 +15,7 @@ public class FreeHome extends Module {
     }
 
     /**
-     * A GameJoinedEvent event handler is not needed because this method runs every GameJoinedEvent
+     * A GameJoinedEvent event handler in this module is not needed because this method runs every GameJoinedEvent
      * @see meteordevelopment.meteorclient.systems.modules.Modules#onGameJoined(GameJoinedEvent)
      */
     @Override

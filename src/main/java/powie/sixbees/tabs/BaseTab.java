@@ -40,7 +40,7 @@ public class BaseTab extends Tab {
         return screen instanceof BaseTabScreen;
     }
 
-    private static class BaseTabScreen extends WindowTabScreen {
+    public static class BaseTabScreen extends WindowTabScreen {
         private Map<String, Base> bases;
 
         public BaseTabScreen(GuiTheme theme, Tab tab) {
@@ -138,8 +138,14 @@ public class BaseTab extends Tab {
         }
 
         private void saveCoords() {
-            BaseUtils.saveBase(baseId,
-                new Base(settings.name.get().trim(), settings.coords.get(), settings.radius.get(), settings.dimension.get()));
+            if (settings.name.get().isEmpty()) return;
+            BaseUtils.saveBase(
+                baseId,
+                new Base(
+                    settings.name.get().trim(),
+                    settings.coords.get(),
+                    settings.radius.get(),
+                    settings.dimension.get()));
             parent.reload();
             mc.setScreen(parent);
         }
@@ -159,13 +165,13 @@ public class BaseTab extends Tab {
 
         private final Setting<BlockPos> coords = sgGeneral.add(new BlockPosSetting.Builder()
             .name("coordinates")
-            .description("The coordinates of the location.")
+            .description("The exact X, Y, Z coordinates of the location.") // Y-level doesn't matter
             .build()
         );
 
         private final Setting<Integer> radius = sgGeneral.add(new IntSetting.Builder()
             .name("radius")
-            .description("The radius of the location.")
+            .description("The range around the coordinates. Anything within this area is considered part of the base.")
             .defaultValue(10000)
             .noSlider()
             .min(1)
@@ -173,7 +179,7 @@ public class BaseTab extends Tab {
             .build()
         );
 
-        public Setting<Dimension> dimension = sgGeneral.add(new EnumSetting.Builder<Dimension>()
+        private final Setting<Dimension> dimension = sgGeneral.add(new EnumSetting.Builder<Dimension>()
             .name("dimension")
             .description("Which dimension the location is in.")
             .defaultValue(Dimension.Overworld)

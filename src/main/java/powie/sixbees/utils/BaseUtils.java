@@ -10,20 +10,24 @@ import static powie.sixbees.utils.Config.readBases;
 public class BaseUtils {
 
     /**
+     * @return The name of the base
      * @see <a href="https://en.wikipedia.org/wiki/Euclidean_distance">Formula</a>
      */
-    public static boolean isInBase(BlockPos playerPos) {
+    public static String getBaseAt(BlockPos playerPos) {
         Map<String, Base> bases = readBases();
-        if (bases.isEmpty()) return false;
+        if (bases.isEmpty()) return "";
 
         for (Base base : bases.values()) {
             int dx = playerPos.getX() - base.coords.getX();
             int dz = playerPos.getZ() - base.coords.getZ();
-            if (dx * dx + dz * dz <= base.radius * base.radius) return true;
+            if (dx * dx + dz * dz <= base.radius * base.radius) return base.name;
         }
-        return false;
+        return "";
     }
-    // TODO: return name of base^^^
+
+    public static boolean isInBase(BlockPos playerPos) {
+        return !getBaseAt(playerPos).isEmpty();
+    }
 
     public static void saveBase(String key, Base base) {
         Map<String, Base> bases = readBases();

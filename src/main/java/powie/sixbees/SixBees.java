@@ -5,10 +5,14 @@ import meteordevelopment.meteorclient.addons.GithubRepo;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
+import meteordevelopment.meteorclient.systems.hud.Hud;
+import meteordevelopment.meteorclient.systems.hud.HudGroup;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import org.slf4j.Logger;
 import powie.sixbees.commands.GetMapId;
+import powie.sixbees.hud.SixBeesStarscript;
+import powie.sixbees.hud.TextPresets;
 import powie.sixbees.modules.*;
 import powie.sixbees.tabs.BaseTab;
 
@@ -18,7 +22,7 @@ import static powie.sixbees.utils.Config.initializeConfig;
 public class SixBees extends MeteorAddon {
     public static final Logger LOG = LogUtils.getLogger();
     public static final Category CATEGORY = new Category("6Bees");
-    // public static final HudGroup HUD_GROUP = new HudGroup("6Bees");
+    public static final HudGroup HUD_GROUP = new HudGroup("6Bees");
 
     @Override
     public void onInitialize() {
@@ -44,6 +48,8 @@ public class SixBees extends MeteorAddon {
         Commands.add(new GetMapId());
 
         // HUD
+        SixBeesStarscript.init();
+        Hud.get().register(TextPresets.INFO);
         // Hud.get().register(HudExample.INFO);
     }
 

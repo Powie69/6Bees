@@ -1,6 +1,12 @@
 package powie.sixbees.modules;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.GuiThemes;
+import meteordevelopment.meteorclient.gui.tabs.Tabs;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -9,10 +15,19 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import powie.sixbees.SixBees;
+import powie.sixbees.tabs.BaseTab;
 import powie.sixbees.utils.BaseUtils;
 
 public class AntiBaseLeak extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        WVerticalList l = theme.verticalList();
+        WButton button = l.add(theme.button("Manage Bases")).widget();
+        button.action = () -> mc.setScreen(Tabs.get(BaseTab.class).createScreen(GuiThemes.get()));
+        return button;
+    }
 
     private final Setting<Boolean> preventTpa = sgGeneral.add(new BoolSetting.Builder()
         .name("prevent-tpa")
@@ -29,7 +44,7 @@ public class AntiBaseLeak extends Module {
     );
 
     private final Setting<Boolean> preventHotspot = sgGeneral.add(new BoolSetting.Builder()
-        .name("prevent-hotspots")
+        .name("prevent-hotspot-creation")
         .description("Prevents you from creating hotspots while in your base")
         .defaultValue(true)
         .build()
@@ -55,11 +70,10 @@ public class AntiBaseLeak extends Module {
             info("Prevented tpa accept from " + secondArgument);
         }
 
-        if (preventHotspot.get() &&
-            command.startsWith("hotspot") &&
-            secondArgument.equals("create") &&
-            BaseUtils.isInBase(mc.player.blockPosition())) {
-            //
+        if (preventHotspot.get()
+            && command.startsWith("hotspot")
+            && secondArgument.equals("create")
+            && BaseUtils.isInBase(mc.player.blockPosition())) {
             event.cancel();
             info("Prevented hotspot creation");
         }
