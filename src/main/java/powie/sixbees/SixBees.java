@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.systems.hud.HudGroup;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import org.slf4j.Logger;
+import powie.sixbees.commands.AddBase;
 import powie.sixbees.commands.GetMapId;
 import powie.sixbees.hud.SixBeesStarscript;
 import powie.sixbees.hud.TextPresets;
@@ -46,6 +47,7 @@ public class SixBees extends MeteorAddon {
         Modules.get().add(new ShowMapId());
 
         Commands.add(new GetMapId());
+        Commands.add(new AddBase());
 
         // HUD
         SixBeesStarscript.init();

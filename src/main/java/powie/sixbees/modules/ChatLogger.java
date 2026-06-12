@@ -11,12 +11,17 @@ public class ChatLogger extends Module {
 
     public ChatLogger() {
         super(SixBees.CATEGORY, "chat-logger", "Used for development purposes");
+        runInMainMenu = true;
+    }
+
+    @Override
+    public void onActivate() {
+        throw new RuntimeException("test");
     }
 
     @EventHandler
     private void onMessageReceive(ReceiveMessageEvent event) {
         String message = event.getMessage().getString();
-
         if (!message.contains("[Meteor] [Chat Logger]")) { // don't crash my pc
             info(message);
         }

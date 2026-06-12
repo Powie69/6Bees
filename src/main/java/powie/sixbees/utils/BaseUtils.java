@@ -17,6 +17,7 @@ public class BaseUtils {
         Map<String, Base> bases = readBases();
         if (bases.isEmpty()) return "";
 
+        // TODO: Dimension check
         for (Base base : bases.values()) {
             int dx = playerPos.getX() - base.coords.getX();
             int dz = playerPos.getZ() - base.coords.getZ();

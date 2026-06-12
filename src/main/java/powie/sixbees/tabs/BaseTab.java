@@ -40,7 +40,7 @@ public class BaseTab extends Tab {
         return screen instanceof BaseTabScreen;
     }
 
-    public static class BaseTabScreen extends WindowTabScreen {
+    private static class BaseTabScreen extends WindowTabScreen {
         private Map<String, Base> bases;
 
         public BaseTabScreen(GuiTheme theme, Tab tab) {
@@ -97,7 +97,7 @@ public class BaseTab extends Tab {
         }
     }
 
-    private static class AddBaseScreen extends WindowScreen {
+    public static class AddBaseScreen extends WindowScreen {
         private final AddBaseSettings settings;
         private final boolean isEdit;
         private final Base base;

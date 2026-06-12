@@ -21,14 +21,6 @@ import powie.sixbees.utils.BaseUtils;
 public class AntiBaseLeak extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    @Override
-    public WWidget getWidget(GuiTheme theme) {
-        WVerticalList l = theme.verticalList();
-        WButton button = l.add(theme.button("Manage Bases")).widget();
-        button.action = () -> mc.setScreen(Tabs.get(BaseTab.class).createScreen(GuiThemes.get()));
-        return button;
-    }
-
     private final Setting<Boolean> preventTpa = sgGeneral.add(new BoolSetting.Builder()
         .name("prevent-tpa")
         .description("Prevents you from accepting tpa requests while in your base")
@@ -40,6 +32,7 @@ public class AntiBaseLeak extends Module {
         .name("allow-friends")
         .description("Don't block tpa request coming from friends")
         .defaultValue(true)
+        .visible(preventTpa::get)
         .build()
     );
 
@@ -49,6 +42,14 @@ public class AntiBaseLeak extends Module {
         .defaultValue(true)
         .build()
     );
+
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        WVerticalList l = theme.verticalList();
+        WButton button = l.add(theme.button("Manage Bases")).widget();
+        button.action = () -> mc.setScreen(Tabs.get(BaseTab.class).createScreen(GuiThemes.get()));
+        return button;
+    }
 
     public AntiBaseLeak() {
         super(SixBees.CATEGORY, "anti-base-leak", "Prevents you from leaking your base");

@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import net.fabricmc.loader.api.FabricLoader;
 import powie.sixbees.utils.BaseUtils.Base;
 
+import javax.management.RuntimeErrorException;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.FileAlreadyExistsException;
@@ -21,11 +22,12 @@ import static powie.sixbees.SixBees.LOG;
 public class Config {
     private static final Path CONFIG_FOLDER = FabricLoader.getInstance().getGameDir().resolve("6bees");
     private static final Gson GSON = new Gson();
-
     private static final Set<String> CONFIG_FILES = Set.of(
         "bases",
         "maps"
     );
+
+    private static volatile Map<String, Base> cachedBases;
 
     public static void initializeConfig() {
         try {
@@ -76,6 +78,8 @@ public class Config {
     // Bases
 
     public static Map<String, Base> readBases() {
+        if (cachedBases != null) return cachedBases;
+
         Path file = CONFIG_FOLDER.resolve("bases");
         if (!Files.exists(file)) return new HashMap<>();
 
@@ -87,11 +91,14 @@ public class Config {
             }.getType();
             Map<String, Base> result = GSON.fromJson(content, type);
 
+            cachedBases = result;
             return result != null ? result : new HashMap<>();
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read bases config", e);
+            cachedBases = null;
+            throw new RuntimeException("Failed to read bases config", e); // Minecraft pls don't catch my shit i wanna crash it
         } catch (JsonParseException e) {
             LOG.error("Failed to parse bases config", e);
+            cachedBases = null;
             return new HashMap<>();
         }
     }
@@ -105,6 +112,8 @@ public class Config {
             Files.writeString(file, json);
         } catch (IOException e) {
             throw new RuntimeException("Failed to save bases config", e);
+        } finally {
+            cachedBases = null;
         }
     }
 
