@@ -40,7 +40,7 @@ public class BaseTab extends Tab {
         return screen instanceof BaseTabScreen;
     }
 
-    private static class BaseTabScreen extends WindowTabScreen {
+    public static class BaseTabScreen extends WindowTabScreen {
         private Map<String, Base> bases;
 
         public BaseTabScreen(GuiTheme theme, Tab tab) {
@@ -76,9 +76,8 @@ public class BaseTab extends Tab {
                     table.add(theme.label(baseValue.name));
 
                     WButton edit = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().right().widget();
-                    edit.action = () -> {
-                        mc.setScreen(new AddBaseScreen(theme, baseValue, BaseKey, this));
-                    };
+                    edit.action = () -> mc.setScreen(new AddBaseScreen(theme, baseValue, BaseKey, this));
+
                     WConfirmedMinus delete = table.add(theme.confirmedMinus()).right().widget();
                     delete.action = () -> {
                         BaseUtils.removeBase(BaseKey);
@@ -132,6 +131,7 @@ public class BaseTab extends Tab {
             WHorizontalList actionButtons = add(theme.horizontalList()).expandX().widget();
             WButton saveBtn = actionButtons.add(theme.button(isEdit ? "Update" : "Create")).expandX().widget();
             saveBtn.action = this::saveCoords;
+            enterAction = this::saveCoords;
 
             WButton cancelBtn = actionButtons.add(theme.button("Cancel")).expandX().widget();
             cancelBtn.action = () -> mc.setScreen(parent);
@@ -146,8 +146,12 @@ public class BaseTab extends Tab {
                     settings.coords.get(),
                     settings.radius.get(),
                     settings.dimension.get()));
-            parent.reload();
-            mc.setScreen(parent);
+            if (parent != null) {
+                parent.reload();
+                mc.setScreen(parent);
+            } else {
+                mc.setScreen(null);
+            }
         }
     }
 

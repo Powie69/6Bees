@@ -3,8 +3,10 @@ package powie.sixbees.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.gui.GuiThemes;
+import meteordevelopment.meteorclient.gui.WidgetScreen;
+import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
-import powie.sixbees.tabs.BaseTab;
+import powie.sixbees.tabs.BaseTab.AddBaseScreen;
 
 import java.util.UUID;
 
@@ -16,13 +18,10 @@ public class AddBase extends Command {
     @Override
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder.executes(_ -> {
-//            BaseTab.BaseTabScreen parentScreen = (BaseTab.BaseTabScreen) Tabs.get(BaseTab.class).createScreen(GuiThemes.get());
-            info("Opening add base gui");
-            mc.setScreen(
-                new BaseTab.AddBaseScreen(GuiThemes.get(), null, UUID.randomUUID().toString(), null));
-            return SINGLE_SUCCESS;
+            WidgetScreen addBaseScreen = new AddBaseScreen(GuiThemes.get(), null, UUID.randomUUID().toString(), null);
+            addBaseScreen.parent = null; // Prevents chat command from staying when pressing ESC
+            Utils.screenToOpen = addBaseScreen;
+            return SINGLE_SUCCESS; // TODO: chat feedback on successful creation
         });
-
-
     }
 }

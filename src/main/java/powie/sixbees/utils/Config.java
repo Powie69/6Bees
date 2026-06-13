@@ -117,7 +117,6 @@ public class Config {
         }
     }
 
-
     // todo: Get data from the internet
 }
 
