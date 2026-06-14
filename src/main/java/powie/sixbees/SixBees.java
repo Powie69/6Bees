@@ -42,6 +42,7 @@ public class SixBees extends MeteorAddon {
         Modules.get().add(new AntiBaseLeak());
         Modules.get().add(new AntiBedTrap());
         Modules.get().add(new AntiTinnitus());
+        Modules.get().add(new Bees());
         Modules.get().add(new FreeHome());
         Modules.get().add(new NsfwBlock());
         Modules.get().add(new ShowMapId());
