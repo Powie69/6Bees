@@ -6,9 +6,12 @@ import com.google.gson.reflect.TypeToken;
 import net.fabricmc.loader.api.FabricLoader;
 import powie.sixbees.utils.BaseUtils.Base;
 
-import javax.management.RuntimeErrorException;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,8 +23,13 @@ import java.util.Set;
 import static powie.sixbees.SixBees.LOG;
 
 public class Config {
-    private static final Path CONFIG_FOLDER = FabricLoader.getInstance().getGameDir().resolve("6bees");
     private static final Gson GSON = new Gson();
+    private static final HttpClient client = HttpClient.newHttpClient();
+    // @formatter:off
+    private static final Type MAPS_TYPE = new TypeToken<HashSet<Integer>>() {}.getType();
+    private static final Type BASES_TYPE = new TypeToken<HashMap<String, Base>>() {}.getType();
+    // @formatter:on
+    private static final Path CONFIG_FOLDER = FabricLoader.getInstance().getGameDir().resolve("6bees");
     private static final Set<String> CONFIG_FILES = Set.of(
         "bases",
         "maps"
@@ -38,6 +46,7 @@ public class Config {
         for (String filename : CONFIG_FILES) {
             createIfAbsent(filename);
         }
+        if (Files.exists(CONFIG_FOLDER.resolve("maps"))) getMaps();
     }
 
     private static void createIfAbsent(String filename) {
@@ -63,15 +72,49 @@ public class Config {
             String content = Files.readString(file).trim();
             if (content.isEmpty()) return new HashSet<>();
 
-            Type setType = new TypeToken<HashSet<Integer>>() {
-            }.getType();
-            Set<Integer> result = GSON.fromJson(content, setType);
+            Set<Integer> result = GSON.fromJson(content, MAPS_TYPE);
             return result != null ? result : new HashSet<>();
         } catch (IOException e) {
             throw new RuntimeException("Failed to read maps config", e);
         } catch (JsonParseException e) {
             LOG.error("Failed to parse maps config", e);
             return new HashSet<>();
+        }
+    }
+
+    private static void getMaps() {
+        try {
+            HttpResponse<String> res = client.send(
+                HttpRequest.newBuilder()
+                    .uri(URI.create("https://powie69.github.io/6bees-data/0.1.0/maps.json"))
+                    .GET()
+                    .build(),
+                HttpResponse.BodyHandlers.ofString()
+            );
+
+            if (res.statusCode() >= 400) {
+                LOG.warn("Maps request failed: HTTP {}", res.statusCode());
+                return;
+            }
+
+            String data = res.body().trim();
+            if (data.isEmpty()) return;
+
+            Set<Integer> result = GSON.fromJson(data, MAPS_TYPE);
+
+            if (result.isEmpty()) return;
+            Files.writeString(CONFIG_FOLDER.resolve("maps"), data);
+            LOG.info("Maps config updated");
+        } catch (JsonParseException e) {
+            LOG.error("Invalid JSON in maps config", e);
+        } catch (IOException e) {
+            // Covers: no internet, DNS fail, connection refused, file write issues, etc.
+            LOG.warn("Failed to fetch maps config (no internet or IO issue)", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOG.warn("Maps request interrupted", e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -87,9 +130,7 @@ public class Config {
             String content = Files.readString(file).trim();
             if (content.isEmpty()) return new HashMap<>();
 
-            Type type = new TypeToken<HashMap<String, Base>>() {
-            }.getType();
-            Map<String, Base> result = GSON.fromJson(content, type);
+            Map<String, Base> result = GSON.fromJson(content, BASES_TYPE);
 
             cachedBases = result;
             return result != null ? result : new HashMap<>();
@@ -116,7 +157,5 @@ public class Config {
             cachedBases = null;
         }
     }
-
-    // todo: Get data from the internet
 }
 

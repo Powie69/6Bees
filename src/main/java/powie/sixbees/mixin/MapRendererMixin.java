@@ -30,11 +30,11 @@ import static powie.sixbees.utils.Config.readMaps;
 
 @Mixin(MapRenderer.class)
 public abstract class MapRendererMixin {
-    @Shadow
-    public abstract void render(MapRenderState mapRenderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, boolean showOnlyFrame, int lightCoords);
-
     private final Set<Integer> nsfwMaps = readMaps();
     private final Set<MapRenderState> blockedStates = Collections.newSetFromMap(new WeakHashMap<>());
+
+    @Shadow
+    public abstract void render(MapRenderState mapRenderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, boolean showOnlyFrame, int lightCoords);
 
     @Inject(
         method = "extractRenderState",

@@ -12,7 +12,7 @@ pls wait for release I might of bite more than I can chew
 
 Please give suggestions on [issues tab](https://github.com/Powie69/6Bees/issues)
 
-## features
+## Features
 
 - **Free Home**: Gives you 2 extra free homes (Not clickbait I swear)
 - **Anti base leak**: Prevents you from leaking your base. as in blocking accidental tpas and hotspots creation.
@@ -25,3 +25,4 @@ Please give suggestions on [issues tab](https://github.com/Powie69/6Bees/issues)
 ### Base system
 
 This addon has a base system that allows you to save and manage your bases.
+TODO: write this out^^^
