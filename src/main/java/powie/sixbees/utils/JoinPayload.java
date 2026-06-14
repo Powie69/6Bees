@@ -10,12 +10,12 @@ public class JoinPayload implements CustomPacketPayload {
 
     public static final StreamCodec<FriendlyByteBuf, JoinPayload> CODEC =
         StreamCodec.of(
-            (buf, payload) -> {},
+            (buf, payload) -> {
+            },
             buf -> new JoinPayload()
         );
 
-    public static final Type<JoinPayload> TYPE =
-        new Type<>(ID);
+    public static final Type<JoinPayload> TYPE = new Type<>(ID);
 
     @Override
     public Type<? extends CustomPacketPayload> type() {

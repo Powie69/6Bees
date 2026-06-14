@@ -30,10 +30,9 @@ public class Config {
     private static final Type BASES_TYPE = new TypeToken<HashMap<String, Base>>() {}.getType();
     // @formatter:on
     private static final Path CONFIG_FOLDER = FabricLoader.getInstance().getGameDir().resolve("6bees");
-    private static final Set<String> CONFIG_FILES = Set.of(
-        "bases",
-        "maps"
-    );
+    private static final Path BASES_FILE = CONFIG_FOLDER.resolve("bases");
+    private static final Path MAPS_FILE = CONFIG_FOLDER.resolve("maps");
+    private static final Set<Path> CONFIG_FILES = Set.of(BASES_FILE, MAPS_FILE);
 
     private static volatile Map<String, Base> cachedBases;
 
@@ -43,33 +42,31 @@ public class Config {
         } catch (IOException e) {
             throw new RuntimeException("Failed to create config folder", e);
         }
-        for (String filename : CONFIG_FILES) {
-            createIfAbsent(filename);
+        for (Path file : CONFIG_FILES) {
+            createIfAbsent(file);
         }
-        if (Files.exists(CONFIG_FOLDER.resolve("maps"))) getMaps();
+        getMaps();
     }
 
-    private static void createIfAbsent(String filename) {
-        Path file = CONFIG_FOLDER.resolve(filename);
+    private static void createIfAbsent(Path file) {
         if (Files.exists(file)) return;
         try {
             Files.createFile(file);
-            LOG.info("Created config file: {}", filename);
+            LOG.info("Created config file: {}", file.getFileName());
         } catch (FileAlreadyExistsException e) {
-            LOG.info("Config file already exists: {}", filename);
+            LOG.info("Config file already exists: {}", file.getFileName());
         } catch (IOException e) {
-            throw new RuntimeException("Failed to create config file: " + filename, e);
+            throw new RuntimeException("Failed to create config file: " + file.getFileName(), e);
         }
     }
 
     // Maps
 
     public static Set<Integer> readMaps() {
-        Path file = CONFIG_FOLDER.resolve("maps");
-        if (!Files.exists(file)) return new HashSet<>();
+        if (!Files.exists(MAPS_FILE)) return new HashSet<>();
 
         try {
-            String content = Files.readString(file).trim();
+            String content = Files.readString(MAPS_FILE).trim();
             if (content.isEmpty()) return new HashSet<>();
 
             Set<Integer> result = GSON.fromJson(content, MAPS_TYPE);
@@ -102,8 +99,8 @@ public class Config {
 
             Set<Integer> result = GSON.fromJson(data, MAPS_TYPE);
 
-            if (result.isEmpty()) return;
-            Files.writeString(CONFIG_FOLDER.resolve("maps"), data);
+            if (result == null || result.isEmpty()) return;
+            Files.writeString(MAPS_FILE, data);
             LOG.info("Maps config updated");
         } catch (JsonParseException e) {
             LOG.error("Invalid JSON in maps config", e);
@@ -123,11 +120,10 @@ public class Config {
     public static Map<String, Base> readBases() {
         if (cachedBases != null) return cachedBases;
 
-        Path file = CONFIG_FOLDER.resolve("bases");
-        if (!Files.exists(file)) return new HashMap<>();
+        if (!Files.exists(BASES_FILE)) return new HashMap<>();
 
         try {
-            String content = Files.readString(file).trim();
+            String content = Files.readString(BASES_FILE).trim();
             if (content.isEmpty()) return new HashMap<>();
 
             Map<String, Base> result = GSON.fromJson(content, BASES_TYPE);
@@ -145,12 +141,9 @@ public class Config {
     }
 
     public static void writeBases(Map<String, Base> bases) {
-        Path file = CONFIG_FOLDER.resolve("bases");
-        if (!Files.exists(file)) throw new RuntimeException("Bases file does not exist");
-
         try {
             String json = GSON.toJson(bases);
-            Files.writeString(file, json);
+            Files.writeString(BASES_FILE, json);
         } catch (IOException e) {
             throw new RuntimeException("Failed to save bases config", e);
         } finally {
