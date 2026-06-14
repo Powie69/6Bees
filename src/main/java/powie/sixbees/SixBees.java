@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudGroup;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import powie.sixbees.commands.AddBase;
 import powie.sixbees.commands.GetMapId;
@@ -67,6 +68,17 @@ public class SixBees extends MeteorAddon {
 
     @Override
     public GithubRepo getRepo() {
-        return new GithubRepo("Powie69", "6Bees", "master", null);
+        return new GithubRepo("Powie69", "6Bees", "main", null);
+    }
+
+    @Override
+    public String getCommit() {
+        String commit = FabricLoader
+            .getInstance()
+            .getModContainer("sixbees")
+            .get().getMetadata()
+            .getCustomValue(":commit")
+            .getAsString();
+        return commit.isEmpty() ? null : commit;
     }
 }
