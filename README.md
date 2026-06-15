@@ -4,13 +4,11 @@
 
 <h1>6Bees</h1>
 
-[![Download Latest Release](https://img.shields.io/github/v/release/username/repo?label=DOWNLOAD&style=for-the-badge&color=ffce2b)](https://github.com/username/repo/releases)
+[![Download Latest Release](https://img.shields.io/github/v/release/Powie69/6Bees?label=DOWNLOAD&style=for-the-badge&color=ffce2b)](https://github.com/Powie69/6Bees/releases)
 
 </div>
 
 Meteor Addon specifically made for [6B6T.org](https://www.6b6t.org/)
-
-pls wait for release I might of bite more than I can chew
 
 Please give suggestions on [issues tab](https://github.com/Powie69/6Bees/issues)
 

@@ -35,7 +35,6 @@ public class SixBees extends MeteorAddon {
         if (isDevEnvOrHasExtraArgs()) {
             Modules.get().add(new AutoLogin());
             Modules.get().add(new ChatLogger());
-            Tabs.add(new BaseTab());
         }
 
         // Modules
@@ -47,13 +46,16 @@ public class SixBees extends MeteorAddon {
         Modules.get().add(new NsfwBlock());
         Modules.get().add(new ShowMapId());
 
+        // Commands
         Commands.add(new GetMapId());
         Commands.add(new AddBase());
 
         // HUD
         SixBeesStarscript.init();
         Hud.get().register(TextPresets.INFO);
-        // Hud.get().register(HudExample.INFO);
+
+        // Tabs
+        Tabs.add(new BaseTab());
     }
 
     @Override
