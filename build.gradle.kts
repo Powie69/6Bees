@@ -52,6 +52,7 @@ tasks {
             "version" to project.version,
             "minecraft_version" to toMinecraftCompat(libs.versions.minecraft.get()),
             "jdk_version" to libs.versions.jdk.get(),
+            "commit" to (System.getenv("GITHUB_SHA") ?: "")
         )
 
         inputs.properties(propertyMap)

@@ -18,6 +18,7 @@ import powie.sixbees.hud.TextPresets;
 import powie.sixbees.modules.*;
 import powie.sixbees.tabs.BaseTab;
 
+import static meteordevelopment.meteorclient.MeteorClient.MOD_META;
 import static powie.sixbees.utils.Checks.isDevEnvOrHasExtraArgs;
 import static powie.sixbees.utils.Config.initializeConfig;
 
@@ -79,7 +80,7 @@ public class SixBees extends MeteorAddon {
             .getInstance()
             .getModContainer("sixbees")
             .get().getMetadata()
-            .getCustomValue(":commit")
+            .getCustomValue("sixbees:commit")
             .getAsString();
         return commit.isEmpty() ? null : commit;
     }

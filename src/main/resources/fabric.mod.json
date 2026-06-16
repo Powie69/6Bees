@@ -24,6 +24,7 @@
     "sixbees.mixins.json"
   ],
   "custom": {
+    "sixbees:commit": "${commit}",
     "meteor-client:color": "255,206,43",
     "modmenu": {
       "issues": "https://github.com/Powie69/6Bees/issues",
