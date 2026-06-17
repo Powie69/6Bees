@@ -18,7 +18,6 @@ import powie.sixbees.hud.TextPresets;
 import powie.sixbees.modules.*;
 import powie.sixbees.tabs.BaseTab;
 
-import static meteordevelopment.meteorclient.MeteorClient.MOD_META;
 import static powie.sixbees.utils.Checks.isDevEnvOrHasExtraArgs;
 import static powie.sixbees.utils.Config.initializeConfig;
 
@@ -35,6 +34,7 @@ public class SixBees extends MeteorAddon {
 
         if (isDevEnvOrHasExtraArgs()) {
             Modules.get().add(new AutoLogin());
+            Modules.get().add(new AntiWeb());
             Modules.get().add(new ChatLogger());
         }
 
@@ -43,6 +43,7 @@ public class SixBees extends MeteorAddon {
         Modules.get().add(new AntiBaseLeak());
         Modules.get().add(new AntiBedTrap());
         Modules.get().add(new AntiTinnitus());
+        Modules.get().add(new AutoWhisper());
         Modules.get().add(new FreeHome());
         Modules.get().add(new NsfwBlock());
         Modules.get().add(new ShowMapId());

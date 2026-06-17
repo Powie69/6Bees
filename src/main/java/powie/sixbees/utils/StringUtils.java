@@ -1,12 +1,13 @@
 package powie.sixbees.utils;
 
 public class StringUtils {
-    public static String possessiveNoun(String string) {
-        if (string == null || string.isBlank()) return "";
-        return string.endsWith("s") ? string + "'" : string + "'s";
+    public static String parsePlayerMessage(String message) {
+        return message.substring(message.indexOf("»") + 1).trim();
     }
 
-    public static String getPlayerMessage(String message) {
-        return message.substring(message.indexOf("»") + 1).trim();
+    public static String parsePlayerName(String input) {
+        String prefix = input.substring(0, input.indexOf('»')).trim();
+        if (prefix.startsWith("[")) return prefix.substring(prefix.indexOf(']') + 1).trim();
+        return prefix;
     }
 }
