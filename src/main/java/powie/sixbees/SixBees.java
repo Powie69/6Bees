@@ -13,6 +13,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import powie.sixbees.commands.AddBase;
 import powie.sixbees.commands.GetMapId;
+import powie.sixbees.events.ChatListener;
 import powie.sixbees.hud.SixBeesStarscript;
 import powie.sixbees.hud.TextPresets;
 import powie.sixbees.modules.*;
@@ -58,6 +59,8 @@ public class SixBees extends MeteorAddon {
 
         // Tabs
         Tabs.add(new BaseTab());
+
+        new ChatListener();
     }
 
     @Override

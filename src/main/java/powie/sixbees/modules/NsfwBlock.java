@@ -1,9 +1,14 @@
 package powie.sixbees.modules;
 
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import net.minecraft.util.Util;
 import powie.sixbees.SixBees;
 
 import java.util.Set;
@@ -26,6 +31,15 @@ public class NsfwBlock extends Module {
     }
 
     private final Set<Integer> NSFW_MAPS = readMaps();
+
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        WVerticalList l = theme.verticalList();
+        l.add(theme.label("If a nsfw map ins't blocked,\nplease consider contributing to the data set <3"));
+        WButton button = l.add(theme.button("Open github repo")).widget();
+        button.action = () -> Util.getPlatform().openUri("https://github.com/Powie69/6bees-data");
+        return l;
+    }
 
     @Override
     public void onActivate() {

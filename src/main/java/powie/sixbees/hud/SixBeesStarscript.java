@@ -1,19 +1,44 @@
 package powie.sixbees.hud;
 
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.Dimension;
+import meteordevelopment.orbit.EventHandler;
 import org.meteordev.starscript.value.Value;
 import org.meteordev.starscript.value.ValueMap;
+import powie.sixbees.events.TeleportMessageEvent;
 import powie.sixbees.utils.BaseUtils;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static powie.sixbees.utils.BaseUtils.isInBase;
 
 public class SixBeesStarscript {
+    private static int teleportSeconds;
+
+    /**
+     * Maybe I could have done the {@link powie.sixbees.events.ChatListener} stuff here?
+     */
+    private static class EventListener {
+        @EventHandler
+        private void onTeleportMessage(TeleportMessageEvent event) {
+            teleportSeconds = event.seconds * 20;
+        }
+
+        @EventHandler
+        private void onTick(TickEvent.Post event) {
+            if (teleportSeconds > 0) teleportSeconds--;
+        }
+    }
+
     public static void init() {
+        MeteorClient.EVENT_BUS.subscribe(new EventListener()); // Ts so buns
+
         MeteorStarscript.ss.set("sixbees", new ValueMap()
             .set("base", SixBeesStarscript::handleBase)
+
+            .set("tp_cooldown", () -> Value.number((double) teleportSeconds / 20))
 
             .set("protected_pos", new ValueMap()
                 .set("x", () -> handleProtectedPos("x"))

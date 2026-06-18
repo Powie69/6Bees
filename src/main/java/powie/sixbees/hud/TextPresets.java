@@ -14,6 +14,7 @@ public class TextPresets {
 
     static {
         addPreset("Base name", "Base: #1{sixbees.base}");
+        addPreset("Teleport cooldown", "Tp Cooldown: #1{sixbees.tp_cooldown}");
     }
 
     private static TextHud create() {
