@@ -34,6 +34,7 @@ public class SixBees extends MeteorAddon {
         initializeConfig();
 
         if (isDevEnvOrHasExtraArgs()) {
+            Modules.get().add(new AirPlacePlus());
             Modules.get().add(new AutoLogin());
             Modules.get().add(new AntiWeb());
             Modules.get().add(new ChatLogger());

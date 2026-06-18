@@ -11,10 +11,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ChatListener {
+    private static final Pattern HOME_TELEPORT_PATTERN = Pattern.compile("^Teleporting to (.+?) in (\\d+) seconds\\. \\[Cancel]$");
+    private static final Pattern YOU_TO_OTHER_PATTERN = Pattern.compile("^Teleporting in (\\d+) seconds\\.\\.\\. \\[Cancel]$");
+    private static final Pattern OTHER_TO_YOU_PATTERN = Pattern.compile("^Request from (.+?) accepted! \\[Cancel]$");
+
     private boolean active = false;
-    private final Pattern HOME_TELEPORT_PATTERN = Pattern.compile("^Teleporting to (.+?) in (\\d+) seconds\\. \\[Cancel]$");
-    private final Pattern YOU_TO_OTHER_PATTERN = Pattern.compile("^Teleporting in (\\d+) seconds\\.\\.\\. \\[Cancel]$");
-    private final Pattern OTHER_TO_YOU_PATTERN = Pattern.compile("^Request from (.+?) accepted! \\[Cancel]$");
 
     /**
      * <p>Hello reader. This is for listening to chat without it being bound to a module or hud</p>
@@ -41,15 +42,19 @@ public class ChatListener {
         if (!active) return;
         String message = event.getMessage().getString();
 
+        // teleports
         handleHomeTeleport(message);
         handleYouToOther(message);
         handleOtherToYou(message);
-
         // tpa and home failure doesn't have the same message
         if (message.equals("Teleport failed!") || message.equals("Teleport failed."))
             MeteorClient.EVENT_BUS.post(new TeleportMessageEvent(0));
+
+        // pvp mode
+        handlePvpMode(message);
     }
 
+    // teleports
     private void handleHomeTeleport(String message) {
         Matcher matcher = HOME_TELEPORT_PATTERN.matcher(message);
         if (!matcher.matches()) return;
@@ -71,5 +76,10 @@ public class ChatListener {
         if (!matcher.matches()) return;
         // its always 15 right??
         MeteorClient.EVENT_BUS.post(new TeleportMessageEvent(15));
+    }
+
+    // pvp mode
+    private void handlePvpMode(String message) {
+        // TODO
     }
 }

@@ -9,12 +9,13 @@ public class TextPresets {
         new HudElementInfo<>(
             SixBees.HUD_GROUP,
             "6Bees",
-            "Hud features",
+            "6bees custom text element",
             TextPresets::create);
 
     static {
         addPreset("Base name", "Base: #1{sixbees.base}");
         addPreset("Teleport cooldown", "Tp Cooldown: #1{sixbees.tp_cooldown}");
+        addPreset("Protected position", "Pos#1{floor(sixbees.protected_pos.x)}, {floor(camera.pos.y)}, {floor(sixbees.protected_pos.z)}");
     }
 
     private static TextHud create() {
