@@ -31,6 +31,7 @@ public class AutoWhisper extends Module {
         .build()
     );
 
+    // TODO: regex support
     private final Setting<List<String>> keyword = sgKeyword.add(new StringListSetting.Builder()
         .name("keyword")
         .description("The keyword to trigger the whisper.")

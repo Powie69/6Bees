@@ -7,8 +7,6 @@ import meteordevelopment.orbit.EventHandler;
 import powie.sixbees.SixBees;
 
 public class ChatLogger extends Module {
-    private final SettingGroup sgGeneral = this.settings.getDefaultGroup();
-
     public ChatLogger() {
         super(SixBees.CATEGORY, "chat-logger", "Used for development purposes");
         runInMainMenu = true;

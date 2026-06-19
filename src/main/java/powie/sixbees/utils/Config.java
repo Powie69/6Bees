@@ -24,7 +24,6 @@ import static powie.sixbees.SixBees.LOG;
 
 public class Config {
     private static final Gson GSON = new Gson();
-    private static final HttpClient client = HttpClient.newHttpClient();
     // @formatter:off
     private static final Type MAPS_TYPE = new TypeToken<HashSet<Integer>>() {}.getType();
     private static final Type BASES_TYPE = new TypeToken<HashMap<String, Base>>() {}.getType();
@@ -81,7 +80,7 @@ public class Config {
 
     private static void getMaps() {
         try {
-            HttpResponse<String> res = client.send(
+            HttpResponse<String> res = HttpClient.newHttpClient().send(
                 HttpRequest.newBuilder()
                     .uri(URI.create("https://powie69.github.io/6bees-data/0.1.0/maps.json"))
                     .GET()
@@ -95,7 +94,10 @@ public class Config {
             }
 
             String data = res.body().trim();
-            if (data.isEmpty()) return;
+            if (data.isEmpty()) {
+                LOG.error("Response body is empty");
+                return;
+            }
 
             Set<Integer> result = GSON.fromJson(data, MAPS_TYPE);
 
