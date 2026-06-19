@@ -14,13 +14,25 @@ Please give suggestions on [issues tab](https://github.com/Powie69/6Bees/issues)
 
 ## Features
 
-- **Free Home**: Gives you 2 extra free homes (Not clickbait I swear)
+### Modules
+- **Ad block**: Blocks ads in various mediums. (chat, bossbar, etc.)
 - **Anti base leak**: Prevents accidental base leaks by blocking actions like teleport requests and hotspot creation while inside a base.
 - **Anti bed trap**: Prevents you from interacting with any respawn blocks.
-- **NSFW maparts blocker**: Blocks rendering of naughty maparts. This will reference a database.
-- **Ad block**: Blocks ads in various mediums. (chat, bossbar, etc.)
 - **Anti tinnitus**: Prevents ear strain and tinnitus during intense Crystal PvP.
+- **Auto Whisper**: Automatically whispers a message to someone whenever they say a specified keyword. useful for promotion bots
+- **Free Home**: Gives you 2 extra free homes (Not clickbait I swear)
+- **NSFW maparts blocker**: Blocks rendering of naughty maparts. This will reference a database.
 - **Show Map Id**: Will always show the map ID of maps in its tooltips.
+
+### HUD
+- **Base Name**: Shows the name of your current base.
+- **Protected Position**: Shows your xyz coordinates unless if you're inside a base.
+- **Teleport countdown**: Shows a countdown timer for your next teleportation (e.g when someone accepts your /tpa).
+- **Teleport Destination**: Shows where you're heading or who is currently teleporting to you. (e.g. /home /hotspot /tpy /tpa)
+
+### Commands
+- **add-base**: Adds a new base to the base system.
+- **get-map-id**: Gets the map ID of the currrent map that you're looking at or holding
 
 ### Base system
 

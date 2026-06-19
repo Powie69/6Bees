@@ -40,7 +40,7 @@ public class SixBeesStarscript {
         MeteorStarscript.ss.set("sixbees", new ValueMap()
             .set("base", SixBeesStarscript::handleBase)
 
-            .set("tp_cooldown", () -> Value.number((double) tpSeconds / 20))
+            .set("tp_countdown", () -> Value.number((double) tpSeconds / 20))
             .set("to_destination", () -> Value.string(tpSeconds != 0 ? tpDestination : ""))
 
             .set("protected_pos", new ValueMap()

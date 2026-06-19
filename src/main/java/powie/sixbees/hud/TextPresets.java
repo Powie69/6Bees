@@ -15,7 +15,7 @@ public class TextPresets {
     static {
         addPreset("Base name", "Base: #1{sixbees.base}");
         addPreset("Protected position", "Pos#1{floor(sixbees.protected_pos.x)}, {floor(camera.pos.y)}, {floor(sixbees.protected_pos.z)}");
-        addPreset("Teleport cooldown", "Tp Cooldown: #1{sixbees.tp_cooldown}");
+        addPreset("Teleport countdown", "Tp Cooldown: #1{sixbees.tp_countdown}");
         addPreset("Teleport destination", "Tp destination: #1{sixbees.tp_destination}");
     }
 
