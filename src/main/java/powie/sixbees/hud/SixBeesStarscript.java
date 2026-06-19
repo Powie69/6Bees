@@ -41,7 +41,7 @@ public class SixBeesStarscript {
             .set("base", SixBeesStarscript::handleBase)
 
             .set("tp_countdown", () -> Value.number((double) tpSeconds / 20))
-            .set("to_destination", () -> Value.string(tpSeconds != 0 ? tpDestination : ""))
+            .set("tp_destination", () -> Value.string(tpSeconds != 0 ? tpDestination : ""))
 
             .set("protected_pos", new ValueMap()
                 .set("x", () -> handleProtectedPos("x"))
