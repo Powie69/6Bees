@@ -15,7 +15,8 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static powie.sixbees.utils.BaseUtils.isInBase;
 
 public class SixBeesStarscript {
-    private static int teleportSeconds;
+    private static int tpSeconds;
+    private static String tpDestination = "";
 
     /**
      * Maybe I could have done the {@link powie.sixbees.events.ChatListener} stuff here?
@@ -23,12 +24,13 @@ public class SixBeesStarscript {
     private static class EventListener {
         @EventHandler
         private void onTeleportMessage(TeleportMessageEvent event) {
-            teleportSeconds = event.seconds * 20;
+            if (event.seconds != -1) tpSeconds = event.seconds * 20;
+            if (event.destination != null) tpDestination = event.destination;
         }
 
         @EventHandler
         private void onTick(TickEvent.Post event) {
-            if (teleportSeconds > 0) teleportSeconds--;
+            if (tpSeconds > 0) tpSeconds--;
         }
     }
 
@@ -38,7 +40,8 @@ public class SixBeesStarscript {
         MeteorStarscript.ss.set("sixbees", new ValueMap()
             .set("base", SixBeesStarscript::handleBase)
 
-            .set("tp_cooldown", () -> Value.number((double) teleportSeconds / 20))
+            .set("tp_cooldown", () -> Value.number((double) tpSeconds / 20))
+            .set("to_destination", () -> Value.string(tpSeconds != 0 ? tpDestination : ""))
 
             .set("protected_pos", new ValueMap()
                 .set("x", () -> handleProtectedPos("x"))
