@@ -4,7 +4,7 @@
 
 <h1>6Bees</h1>
 
-[![Download Latest Release](https://img.shields.io/github/v/release/Powie69/6Bees?label=DOWNLOAD&style=for-the-badge&color=ffce2b)](https://github.com/Powie69/6Bees/releases)
+[![Download Latest Release](https://img.shields.io/github/v/release/Powie69/6bees?sort=semver&style=for-the-badge&label=DOWNLOAD&labelColor=ffce2b&color=321e19)](https://github.com/Powie69/6Bees/releases)
 
 </div>
 
