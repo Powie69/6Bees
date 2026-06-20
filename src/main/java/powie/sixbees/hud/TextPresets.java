@@ -15,8 +15,8 @@ public class TextPresets {
     static {
         addPreset("Base name", "Base: #1{sixbees.base}");
         addPreset("Protected position", "Pos#1{floor(sixbees.protected_pos.x)}, {floor(camera.pos.y)}, {floor(sixbees.protected_pos.z)}");
-        addPreset("Teleport countdown", "Tp Cooldown: #1{sixbees.tp_countdown}");
-        addPreset("Teleport destination", "Tp destination: #1{sixbees.tp_destination}");
+        addPreset("Teleport countdown", "Tp countdown: #1{sixbees.tp.countdown}");
+        addPreset("Teleport destination", "Tp destination: #1{sixbees.tp.destination}");
     }
 
     private static TextHud create() {

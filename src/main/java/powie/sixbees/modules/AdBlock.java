@@ -46,12 +46,9 @@ public class AdBlock extends Module {
     @EventHandler
     private void onMessageReceive(ReceiveMessageEvent event) {
         if (!filterChat.get()) return;
-
         String message = event.getMessage().getString();
 
-        if (message.startsWith("---------------------------")) {
-            event.cancel();
-        }
+        if (message.startsWith("---------------------------")) event.cancel();
     }
 
     @EventHandler

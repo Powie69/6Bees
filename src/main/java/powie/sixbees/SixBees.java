@@ -19,6 +19,8 @@ import powie.sixbees.hud.TextPresets;
 import powie.sixbees.modules.*;
 import powie.sixbees.tabs.BaseTab;
 
+import java.util.List;
+
 import static powie.sixbees.utils.Checks.isDevEnvOrHasExtraArgs;
 import static powie.sixbees.utils.Config.initializeConfig;
 
@@ -34,10 +36,13 @@ public class SixBees extends MeteorAddon {
         initializeConfig();
 
         if (isDevEnvOrHasExtraArgs()) {
-            Modules Module = Modules.get(); // hacky way to avoid getting addon scrapped
-            Module.add(new AirPlacePlus());
-            Module.add(new AutoLogin());
-            Module.add(new ChatLogger());
+            // hacky way to avoid getting addon scrapped
+            List<meteordevelopment.meteorclient.systems.modules.Module> devModules = List.of(
+                new AirPlacePlus(),
+                new AutoLogin(),
+                new ChatLogger()
+            );
+            devModules.forEach(Modules.get()::add);
         }
 
         // Modules

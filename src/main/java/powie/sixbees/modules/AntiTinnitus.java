@@ -42,7 +42,4 @@ public class AntiTinnitus extends Module {
     public AntiTinnitus() {
         super(SixBees.CATEGORY, "anti-tinnitus", "Makes the game less noisy");
     }
-
-
-
 }

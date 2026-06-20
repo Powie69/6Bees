@@ -40,8 +40,10 @@ public class SixBeesStarscript {
         MeteorStarscript.ss.set("sixbees", new ValueMap()
             .set("base", SixBeesStarscript::handleBase)
 
-            .set("tp_countdown", () -> Value.number((double) tpSeconds / 20))
-            .set("tp_destination", () -> Value.string(tpSeconds != 0 ? tpDestination : ""))
+            .set("tp", new ValueMap()
+                .set("countdown", () -> Value.number((double) tpSeconds / 20))
+                .set("destination", () -> Value.string(tpSeconds != 0 ? tpDestination : ""))
+            )
 
             .set("protected_pos", new ValueMap()
                 .set("x", () -> handleProtectedPos("x"))
