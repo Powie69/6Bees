@@ -13,16 +13,21 @@ loom = "1.16-SNAPSHOT"
 # Meteor (https://github.com/MeteorDevelopment/meteor-client/)
 meteor = "26.1.2-SNAPSHOT"
 
+# baritone
+baritone = "26.1-SNAPSHOT"
+
 # Mods
 
 [libraries]
 # Fabric base
 minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
-yarn = { module = "net.fabricmc:yarn", version.ref = "yarn-mappings" }
 fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
 
 # Meteor client
 meteor-client = { module = "meteordevelopment:meteor-client", version.ref = "meteor" }
+
+# Baritone
+baritone = { module = "meteordevelopment:baritone", version.ref = "baritone" }
 
 # Mods
 

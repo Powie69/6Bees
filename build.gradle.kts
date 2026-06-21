@@ -27,6 +27,9 @@ dependencies {
     // Meteor
     implementation(libs.meteor.client)
 
+    // baritone
+    compileOnly(libs.baritone)
+
     // Gson
     implementation("com.google.code.gson:gson:2.10.1")
 }

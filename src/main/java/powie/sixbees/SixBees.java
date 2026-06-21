@@ -40,7 +40,8 @@ public class SixBees extends MeteorAddon {
             List<meteordevelopment.meteorclient.systems.modules.Module> devModules = List.of(
                 new AirPlacePlus(),
                 new AutoLogin(),
-                new ChatLogger()
+                new ChatLogger(),
+                new StashMover()
             );
             devModules.forEach(Modules.get()::add);
         }
