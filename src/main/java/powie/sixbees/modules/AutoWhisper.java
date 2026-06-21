@@ -4,10 +4,7 @@ import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
-import meteordevelopment.meteorclient.settings.IntSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.settings.StringListSetting;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -15,6 +12,9 @@ import powie.sixbees.SixBees;
 import powie.sixbees.utils.StringUtils;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class AutoWhisper extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -31,11 +31,30 @@ public class AutoWhisper extends Module {
         .build()
     );
 
-    // TODO: regex support
+    private final Setting<keywordType> mode = sgKeyword.add(new EnumSetting.Builder<keywordType>()
+        .name("mode")
+        .description("""
+            - Simple: Matches the keyword as a substring (e.g., 'apple' finds 'pineapple') (case-insensitive).
+            - Regex:  Matches the keyword using regex
+            """)
+        .defaultValue(keywordType.SIMPLE)
+        .build()
+    );
+
     private final Setting<List<String>> keyword = sgKeyword.add(new StringListSetting.Builder()
         .name("keyword")
         .description("The keyword to trigger the whisper.")
         .defaultValue(List.of("kit"))
+        .visible(() -> mode.get() == keywordType.SIMPLE)
+        .build()
+    );
+
+    private final Setting<List<String>> keywordRegex = sgKeyword.add(new StringListSetting.Builder()
+        .name("keyword")
+        .description("The keyword to trigger the whisper. (regex mode)")
+        .defaultValue(List.of("kit"))
+        .visible(() -> mode.get() == keywordType.REGEX)
+        .onChanged(_ -> compileKeywordRegexList())
         .build()
     );
 
@@ -55,8 +74,24 @@ public class AutoWhisper extends Module {
     private int messageCooldown = 0;
     private final Queue<String> messagesQueue = new ArrayDeque<>();
 
+    private final List<Pattern> keywordRegexList = new ArrayList<>();
+
+    private void compileKeywordRegexList() {
+        keywordRegexList.clear();
+
+        for (int i = 0; i < keywordRegex.get().size(); i++) {
+            try {
+                keywordRegexList.add(Pattern.compile(keywordRegex.get().get(i)));
+            } catch (PatternSyntaxException _) {
+                String removed = keywordRegex.get().remove(i);
+                error("Removing Invalid regex: %s", removed);
+            }
+        }
+    }
+
     public AutoWhisper() {
         super(SixBees.CATEGORY, "auto-whisper", "Automatically whispers a message to someone whenever they say a specified keyword");
+        compileKeywordRegexList();
     }
 
     @Override
@@ -73,10 +108,16 @@ public class AutoWhisper extends Module {
         String name = StringUtils.parsePlayerName(unparsedMessage);
 
         if (ignoredPlayers.get().contains(name) || mc.player.getName().equals(name)) return;
-        if (keyword.get().stream()
-            .filter(k -> !k.isBlank())
-            .map(String::toLowerCase)
-            .noneMatch(message::contains)) return;
+        if (mode.get() == keywordType.SIMPLE) {
+            if (keyword.get().stream()
+                .filter(k -> !k.isBlank())
+                .map(String::toLowerCase)
+                .noneMatch(message::contains)) return;
+        } else {
+            if (keywordRegexList.stream()
+                .map(p -> p.matcher(message))
+                .noneMatch(Matcher::find)) return;
+        }
 
         if (messageToSend.get().isEmpty()) {
             error("There are no specified messages to send!");
@@ -97,5 +138,10 @@ public class AutoWhisper extends Module {
 
         ChatUtils.sendPlayerMsg(Objects.requireNonNull(messagesQueue.poll()));
         messageCooldown = cooldown.get();
+    }
+
+    private enum keywordType {
+        SIMPLE,
+        REGEX
     }
 }
