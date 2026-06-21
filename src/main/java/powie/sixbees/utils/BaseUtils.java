@@ -5,29 +5,47 @@ import net.minecraft.core.BlockPos;
 
 import java.util.Map;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+import static meteordevelopment.meteorclient.utils.player.PlayerUtils.getDimension;
 import static powie.sixbees.utils.Config.readBases;
 
 public class BaseUtils {
-
     /**
      * @return The name of the base
      * @see <a href="https://en.wikipedia.org/wiki/Euclidean_distance">Formula</a>
      */
-    public static String getBaseAt(BlockPos playerPos) {
+    public static String getBaseName() {
         Map<String, Base> bases = readBases();
         if (bases.isEmpty()) return "";
 
-        // TODO: Dimension check
+        BlockPos playerPos = mc.player.blockPosition();
+        Dimension playerDimension = getDimension();
+
         for (Base base : bases.values()) {
-            int dx = playerPos.getX() - base.coords.getX();
-            int dz = playerPos.getZ() - base.coords.getZ();
+            BlockPos scaledPos = convertCoords(playerPos, playerDimension, base.dimension);
+            if (scaledPos == null) continue;
+
+            int dx = scaledPos.getX() - base.coords.getX();
+            int dz = scaledPos.getZ() - base.coords.getZ();
             if (dx * dx + dz * dz <= base.radius * base.radius) return base.name;
         }
         return "";
     }
 
     public static boolean isInBase(BlockPos playerPos) {
-        return !getBaseAt(playerPos).isEmpty();
+        return !getBaseName().isEmpty();
+    }
+
+    private static BlockPos convertCoords(BlockPos pos, Dimension from, Dimension to) {
+        if (from == to) return pos;
+        if (from == Dimension.Nether && to == Dimension.Overworld) {
+            return new BlockPos(pos.getX() * 8, pos.getY(), pos.getZ() * 8);
+        }
+        if (from == Dimension.Overworld && to == Dimension.Nether) {
+            return new BlockPos(pos.getX() / 8, pos.getY(), pos.getZ() / 8);
+        }
+        // if there's no valid conversion (e.g. involving the End).
+        return null;
     }
 
     public static void saveBase(String key, Base base) {

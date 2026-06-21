@@ -59,7 +59,7 @@ public class SixBeesStarscript {
 
     private static Value handleBase() {
         if (mc.player == null) return Value.string("");
-        return Value.string(BaseUtils.getBaseAt(mc.player.blockPosition()));
+        return Value.string(BaseUtils.getBaseName());
     }
 
     private static Value handleProtectedPos(String axis) {
