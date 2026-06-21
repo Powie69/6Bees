@@ -62,7 +62,7 @@ public class AntiBedTrap extends Module {
     private void onInteractBlock(InteractBlockEvent event) {
         Block block = mc.level.getBlockState(event.result.getBlockPos()).getBlock();
         if (block instanceof BedBlock) {
-            if (allowInBase.get() && isInBase(mc.player.blockPosition())) return;
+            if (allowInBase.get() && isInBase()) return;
             if (allowExplosiveBypass.get() &&
                 mc.level.dimension() != Level.OVERWORLD &&
                 maxDamage.get() > DamageUtils.bedDamage(mc.player, event.result.getBlockPos().getCenter())) {
@@ -72,7 +72,7 @@ public class AntiBedTrap extends Module {
             return;
         }
         if (block instanceof RespawnAnchorBlock) {
-            if (allowInBase.get() && isInBase(mc.player.blockPosition())) return;
+            if (allowInBase.get() && isInBase()) return;
             if (allowExplosiveBypass.get() &&
                 mc.level.dimension() != Level.NETHER &&
                 maxDamage.get() > DamageUtils.anchorDamage(mc.player, event.result.getBlockPos().getCenter())) {

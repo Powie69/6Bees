@@ -64,7 +64,7 @@ public class SixBeesStarscript {
 
     private static Value handleProtectedPos(String axis) {
         if (mc.player == null) return Value.number(0);
-        if (isInBase(mc.player.blockPosition())) return Value.number(0);
+        if (isInBase()) return Value.number(0);
 
         return switch (axis) {
             case "x" -> Value.number(mc.player.blockPosition().getX());
@@ -75,7 +75,7 @@ public class SixBeesStarscript {
 
     private static Value handleProtectedPosOpposite(String axis) {
         if (mc.player == null) return Value.number(0);
-        if (isInBase(mc.player.blockPosition())) return Value.number(0);
+        if (isInBase()) return Value.number(0);
 
         double val = switch (axis) {
             case "x" -> mc.player.getX();

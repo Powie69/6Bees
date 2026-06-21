@@ -64,7 +64,7 @@ public class AntiBaseLeak extends Module {
 
         if (preventTpa.get() && command.startsWith("tpy") && !secondArgument.isEmpty()) {
             if (allowFriendsTpa.get() && Friends.get().get(secondArgument) != null) return;
-            if (!BaseUtils.isInBase(mc.player.blockPosition())) return;
+            if (!BaseUtils.isInBase()) return;
             // Don't print message if player ins't valid (not online). In my opinion it's bad ux
             if (mc.getConnection().getPlayerInfoIgnoreCase(secondArgument) == null) return;
             event.cancel();
@@ -74,7 +74,7 @@ public class AntiBaseLeak extends Module {
         if (preventHotspot.get()
             && command.startsWith("hotspot")
             && secondArgument.equals("create")
-            && BaseUtils.isInBase(mc.player.blockPosition())) {
+            && BaseUtils.isInBase()) {
             event.cancel();
             info("Prevented hotspot creation");
         }

@@ -32,7 +32,7 @@ public class BaseUtils {
         return "";
     }
 
-    public static boolean isInBase(BlockPos playerPos) {
+    public static boolean isInBase() {
         return !getBaseName().isEmpty();
     }
 
