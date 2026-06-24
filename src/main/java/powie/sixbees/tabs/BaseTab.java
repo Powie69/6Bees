@@ -146,12 +146,8 @@ public class BaseTab extends Tab {
                     settings.coords.get(),
                     settings.radius.get(),
                     settings.dimension.get()));
-            if (parent != null) {
-                parent.reload();
-                mc.setScreen(parent);
-            } else {
-                mc.setScreen(null);
-            }
+            if (parent != null) parent.reload();
+            mc.setScreen(parent);
         }
     }
 

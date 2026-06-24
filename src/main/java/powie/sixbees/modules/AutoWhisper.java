@@ -1,5 +1,6 @@
 package powie.sixbees.modules;
 
+import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
@@ -62,6 +63,7 @@ public class AutoWhisper extends Module {
         .name("message")
         .description("The list of possible messages to whisper. (randomly selected)")
         .defaultValue(List.of("Get kits at discord.gg/link"))
+        .onChanged(_ -> validateMessageToSend())
         .build()
     );
 
@@ -71,23 +73,10 @@ public class AutoWhisper extends Module {
         .build()
     );
 
-    private int messageCooldown = 0;
     private final Queue<String> messagesQueue = new ArrayDeque<>();
-
     private final List<Pattern> keywordRegexList = new ArrayList<>();
 
-    private void compileKeywordRegexList() {
-        keywordRegexList.clear();
-
-        for (int i = 0; i < keywordRegex.get().size(); i++) {
-            try {
-                keywordRegexList.add(Pattern.compile(keywordRegex.get().get(i)));
-            } catch (PatternSyntaxException _) {
-                String removed = keywordRegex.get().remove(i);
-                error("Removing Invalid regex: %s", removed);
-            }
-        }
-    }
+    private int messageCooldown = 0;
 
     public AutoWhisper() {
         super(SixBees.CATEGORY, "auto-whisper", "Automatically whispers a message to someone whenever they say a specified keyword");
@@ -97,6 +86,15 @@ public class AutoWhisper extends Module {
     @Override
     public WWidget getWidget(GuiTheme theme) {
         return theme.label("Might get you /ignored\nUse responsibly");
+    }
+
+    @Override
+    public void onActivate() {
+        if (!validateMessageToSend()) toggle();
+        if (messageToSend.get().isEmpty()) {
+            error("There are no specified messages to send!");
+            toggle();
+        }
     }
 
     @EventHandler
@@ -138,6 +136,27 @@ public class AutoWhisper extends Module {
 
         ChatUtils.sendPlayerMsg(Objects.requireNonNull(messagesQueue.poll()));
         messageCooldown = cooldown.get();
+    }
+
+    private boolean validateMessageToSend() {
+        if (messageToSend.get().removeIf(String::isBlank)) {
+            error("Removing empty messages");
+            return false;
+        }
+        return true;
+    }
+
+    private void compileKeywordRegexList() {
+        keywordRegexList.clear();
+
+        for (int i = 0; i < keywordRegex.get().size(); i++) {
+            try {
+                keywordRegexList.add(Pattern.compile(keywordRegex.get().get(i)));
+            } catch (PatternSyntaxException _) {
+                String removed = keywordRegex.get().remove(i);
+                error("Removing Invalid regex: %s", removed);
+            }
+        }
     }
 
     private enum keywordType {
