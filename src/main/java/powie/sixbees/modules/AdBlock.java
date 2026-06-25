@@ -11,6 +11,7 @@ import powie.sixbees.SixBees;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static powie.sixbees.utils.Checks.is6B6T;
 
@@ -21,6 +22,15 @@ public class AdBlock extends Module {
         .name("chat")
         .description("Blocks server messages telling you about commands and voting")
         .defaultValue(true)
+        .onChanged(_ -> isAllSettingsOff())
+        .build()
+    );
+
+    private final BoolSetting discordlinks = sgGeneral.add(new BoolSetting.Builder()
+        .name("discord-links")
+        .description("Blocks discord links sent by players")
+        .defaultValue(true)
+        .onChanged(_ -> isAllSettingsOff())
         .build()
     );
 
@@ -28,8 +38,14 @@ public class AdBlock extends Module {
         .name("wither-bars")
         .description("Hides wither bars. Except for hotspots")
         .defaultValue(true)
+        .onChanged(_ -> isAllSettingsOff())
         .build()
     );
+
+    /**
+     * @see <a href="https://regex101.com/r/QNPk9U/1">Source</a>
+     */
+    private final Pattern discordLinkPattern = Pattern.compile("(https://)?(www\\.)?(((discord(app)?)?\\.com/invite)|((discord(app)?)?\\.gg))/(?<invite>.+)");
 
     public AdBlock() {
         super(SixBees.CATEGORY, "ad-block", "Blocks ads in various mediums");
@@ -41,6 +57,8 @@ public class AdBlock extends Module {
             error("This module is only compatible with 6b6t");
             toggle();
         }
+
+        if (isAllSettingsOff()) toggle();
     }
 
     @EventHandler
@@ -48,7 +66,13 @@ public class AdBlock extends Module {
         if (!filterChat.get()) return;
         String message = event.getMessage().getString();
 
-        if (message.startsWith("---------------------------")) event.cancel();
+        if (message.startsWith("---------------------------")
+            || message.startsWith("Please add your email ")) {
+            event.cancel();
+            return;
+        }
+
+        if (discordlinks.get() && discordLinkPattern.matcher(message).find()) event.cancel();
     }
 
     @EventHandler
@@ -57,10 +81,16 @@ public class AdBlock extends Module {
 
         List<LerpingBossEvent> filtered = new ArrayList<>();
         event.iterator.forEachRemaining(bar -> {
-            if (bar.getName().getString().endsWith("- teleport with /hotspot")) {
-                filtered.add(bar);
-            }
+            if (bar.getName().getString().endsWith("- teleport with /hotspot")) filtered.add(bar);
         });
         event.iterator = filtered.iterator();
+    }
+
+    private boolean isAllSettingsOff() {
+        if (!filterChat.get() && !discordlinks.get() && !filterWithers.get()) {
+            error("No settings are enabled!");
+            return true;
+        }
+        return false;
     }
 }
