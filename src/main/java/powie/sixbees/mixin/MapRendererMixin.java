@@ -33,8 +33,8 @@ public abstract class MapRendererMixin {
     @Shadow
     public abstract void render(MapRenderState mapRenderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, boolean showOnlyFrame, int lightCoords);
 
-    private final Set<Integer> nsfwMaps = readMaps(); // yo don't move this it breaks it idk why
-    private final Set<MapRenderState> blockedStates = Collections.newSetFromMap(new WeakHashMap<>());
+    private static final Set<Integer> nsfwMaps = readMaps(); // yo don't move this it breaks it idk why
+    private static final Set<MapRenderState> blockedStates = Collections.newSetFromMap(new WeakHashMap<>());
 
     @Inject(
         method = "extractRenderState",

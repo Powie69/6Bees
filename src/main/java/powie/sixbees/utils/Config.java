@@ -12,15 +12,18 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import static powie.sixbees.SixBees.LOG;
+import static powie.sixbees.utils.Checks.isDevEnvOrHasExtraArgs;
 
 public class Config {
     private static final Gson GSON = new Gson();
@@ -44,7 +47,7 @@ public class Config {
         for (Path file : CONFIG_FILES) {
             createIfAbsent(file);
         }
-        getMaps();
+        fetchMaps();
     }
 
     private static void createIfAbsent(Path file) {
@@ -78,11 +81,14 @@ public class Config {
         }
     }
 
-    private static void getMaps() {
+    private static void fetchMaps() {
+        Duration timeoutDuration = isDevEnvOrHasExtraArgs() ? Duration.ofSeconds(2) : Duration.ofSeconds(8);
+
         try {
             HttpResponse<String> res = HttpClient.newHttpClient().send(
                 HttpRequest.newBuilder()
                     .uri(URI.create("https://powie69.github.io/6bees-data/0.1.0/maps.json"))
+                    .timeout(timeoutDuration)
                     .GET()
                     .build(),
                 HttpResponse.BodyHandlers.ofString()
@@ -106,6 +112,8 @@ public class Config {
             LOG.info("Maps config updated");
         } catch (JsonParseException e) {
             LOG.error("Invalid JSON in maps config", e);
+        } catch (HttpTimeoutException e) {
+            LOG.warn("Maps request timed out", e);
         } catch (IOException e) {
             // Covers: no internet, DNS fail, connection refused, file write issues, etc.
             LOG.warn("Failed to fetch maps config (no internet or IO issue)", e);

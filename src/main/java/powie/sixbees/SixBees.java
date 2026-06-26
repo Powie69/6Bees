@@ -39,6 +39,7 @@ public class SixBees extends MeteorAddon {
             // hacky way to avoid getting addon scrapped
             List<meteordevelopment.meteorclient.systems.modules.Module> devModules = List.of(
                 new AirPlacePlus(),
+                new AntiWeb(),
                 new AutoLogin(),
                 new ChatLogger()
             );
