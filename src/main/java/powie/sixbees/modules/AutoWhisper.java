@@ -16,6 +16,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import static powie.sixbees.utils.Checks.is6B6T;
+
 public class AutoWhisper extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgKeyword = settings.createGroup("Keywords");
@@ -92,6 +94,10 @@ public class AutoWhisper extends Module {
         if (!validateMessageToSend()) toggle();
         if (messageToSend.get().isEmpty()) {
             error("There are no specified messages to send!");
+            toggle();
+        }
+        if (!is6B6T()) {
+            error("This module is only compatible with 6B6T");
             toggle();
         }
     }
