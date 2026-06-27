@@ -40,7 +40,7 @@ public class BaseTab extends Tab {
         return screen instanceof BaseTabScreen;
     }
 
-    private static class BaseTabScreen extends WindowTabScreen {
+    public static class BaseTabScreen extends WindowTabScreen {
         private Map<String, Base> bases;
 
         public BaseTabScreen(GuiTheme theme, Tab tab) {
@@ -50,6 +50,7 @@ public class BaseTab extends Tab {
 
         @Override
         public void initWidgets() {
+            this.bases = readBases();
             WTable table = add(theme.table()).expandX().minWidth(400).widget();
             initTable(table);
 
@@ -86,13 +87,6 @@ public class BaseTab extends Tab {
 
                     table.row();
                 });
-        }
-
-        @Override
-        public void reload() {
-            bases = readBases();
-            clear();
-            initWidgets();
         }
     }
 

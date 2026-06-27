@@ -8,6 +8,7 @@ import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudGroup;
 import meteordevelopment.meteorclient.systems.modules.Category;
+import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ public class SixBees extends MeteorAddon {
 
         if (isDevEnvOrHasExtraArgs()) {
             // hacky way to avoid getting addon scrapped
-            List<meteordevelopment.meteorclient.systems.modules.Module> devModules = List.of(
+            List<Module> devModules = List.of(
                 new AirPlacePlus(),
                 new AutoLogin(),
                 new ChatLogger()

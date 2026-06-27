@@ -16,6 +16,7 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -26,14 +27,16 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
-import static powie.sixbees.utils.Config.readMaps;
 
 @Mixin(MapRenderer.class)
 public abstract class MapRendererMixin {
     @Shadow
     public abstract void render(MapRenderState mapRenderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, boolean showOnlyFrame, int lightCoords);
 
-    private static final Set<Integer> nsfwMaps = readMaps(); // yo don't move this it breaks it idk why
+    @Unique
+    private static final Set<Integer> nsfwMaps = NsfwBlock.NSFW_MAPS;
+
+    @Unique
     private static final Set<MapRenderState> blockedStates = Collections.newSetFromMap(new WeakHashMap<>());
 
     @Inject(

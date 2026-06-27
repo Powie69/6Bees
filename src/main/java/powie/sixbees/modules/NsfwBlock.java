@@ -8,8 +8,10 @@ import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.orbit.EventHandler;
 import net.minecraft.util.Util;
 import powie.sixbees.SixBees;
+import powie.sixbees.events.NewMapsDataEvent;
 
 import java.util.Set;
 
@@ -30,7 +32,7 @@ public class NsfwBlock extends Module {
         super(SixBees.CATEGORY, "nsfw-blocker", "Blocks rendering of nsfw map arts");
     }
 
-    private final Set<Integer> NSFW_MAPS = readMaps();
+    public static Set<Integer> NSFW_MAPS = readMaps();
 
     @Override
     public WWidget getWidget(GuiTheme theme) {
@@ -44,5 +46,10 @@ public class NsfwBlock extends Module {
     @Override
     public void onActivate() {
         if (isDevEnvOrHasExtraArgs()) info(NSFW_MAPS.toString());
+    }
+
+    @EventHandler
+    private void onNewMapsData(NewMapsDataEvent event) {
+        NSFW_MAPS = event.mapIds;
     }
 }

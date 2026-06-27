@@ -3,7 +3,9 @@ package powie.sixbees.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
+import meteordevelopment.meteorclient.MeteorClient;
 import net.fabricmc.loader.api.FabricLoader;
+import powie.sixbees.events.NewMapsDataEvent;
 import powie.sixbees.utils.BaseUtils.Base;
 
 import java.io.IOException;
@@ -82,47 +84,49 @@ public class Config {
     }
 
     private static void fetchMaps() {
-        Duration timeoutDuration = isDevEnvOrHasExtraArgs() ? Duration.ofSeconds(2) : Duration.ofSeconds(8);
-
-        try {
-            HttpResponse<String> res = HttpClient.newHttpClient().send(
+        HttpClient.newHttpClient().sendAsync(
                 HttpRequest.newBuilder()
                     .uri(URI.create("https://powie69.github.io/6bees-data/0.1.0/maps.json"))
-                    .timeout(timeoutDuration)
+                    .timeout(Duration.ofSeconds(60))
                     .GET()
                     .build(),
                 HttpResponse.BodyHandlers.ofString()
-            );
+            )
+            .thenAccept(res -> {
+                if (res.statusCode() >= 400) {
+                    LOG.warn("Maps request failed: HTTP {}", res.statusCode());
+                    return;
+                }
 
-            if (res.statusCode() >= 400) {
-                LOG.warn("Maps request failed: HTTP {}", res.statusCode());
-                return;
-            }
+                String data = res.body().trim();
+                if (data.isEmpty()) {
+                    LOG.error("Response body is empty");
+                    return;
+                }
 
-            String data = res.body().trim();
-            if (data.isEmpty()) {
-                LOG.error("Response body is empty");
-                return;
-            }
+                Set<Integer> result = GSON.fromJson(data, MAPS_TYPE);
+                if (result == null || result.isEmpty()) return;
 
-            Set<Integer> result = GSON.fromJson(data, MAPS_TYPE);
+                try {
+                    Files.writeString(MAPS_FILE, data);
+                    MeteorClient.EVENT_BUS.post(new NewMapsDataEvent(result));
+                    LOG.info("Maps config updated");
+                } catch (IOException e) {
+                    LOG.warn("Failed to write maps file", e);
+                }
+            })
+            .exceptionally(e -> {
+                Throwable cause = e.getCause();
 
-            if (result == null || result.isEmpty()) return;
-            Files.writeString(MAPS_FILE, data);
-            LOG.info("Maps config updated");
-        } catch (JsonParseException e) {
-            LOG.error("Invalid JSON in maps config", e);
-        } catch (HttpTimeoutException e) {
-            LOG.warn("Maps request timed out", e);
-        } catch (IOException e) {
-            // Covers: no internet, DNS fail, connection refused, file write issues, etc.
-            LOG.warn("Failed to fetch maps config (no internet or IO issue)", e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            LOG.warn("Maps request interrupted", e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+                switch (cause) {
+                    case HttpTimeoutException _ -> LOG.warn("Maps request timed out");
+                    case JsonParseException _ -> LOG.error("Invalid JSON in maps config", cause);
+                    case IOException _ -> LOG.warn("Failed to fetch maps config (no internet or IO issue)", cause);
+                    case null, default -> LOG.warn("Unexpected error fetching maps config", cause);
+                }
+
+                return null;
+            });
     }
 
     // Bases
