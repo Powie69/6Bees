@@ -27,6 +27,13 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build -Pcommit=${{ github.sha }}
 
+      - name: Print SHA256 of built jar
+        run: |
+          echo "### SHA256 Hashes" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          sha256sum build/libs/*.jar >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
       - name: Dev Build
         uses: actions/upload-artifact@v7
         with:
