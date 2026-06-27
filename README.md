@@ -19,7 +19,8 @@ Please give suggestions on [issues tab](https://github.com/Powie69/6Bees/issues)
 - **Anti base leak**: Prevents accidental base leaks by blocking actions like teleport requests and hotspot creation while inside a base.
 - **Anti bed trap**: Prevents you from interacting with any respawn blocks.
 - **Anti tinnitus**: Prevents ear strain and tinnitus during intense Crystal PvP.
-- **Auto Whisper**: Automatically whispers a message to someone whenever they say a specified keyword. useful for promotion bots
+- **Anti Web**: Prevents you from walking into webs. (but not falling into them)
+- **Auto Whisper**: Automatically whispers a message to someone whenever they say a specified keyword.
 - **Free Home**: Gives you 2 extra free homes (Not clickbait I swear)
 - **NSFW maparts blocker**: Blocks rendering of naughty maparts. This will reference a database.
 - **Show Map Id**: Will always show the map ID of maps in its tooltips.

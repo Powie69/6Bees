@@ -9,13 +9,19 @@ import powie.sixbees.SixBees;
 
 public class AntiWeb extends Module {
     public AntiWeb() {
-        super(SixBees.CATEGORY, "anti-web", "Prevents you from walking into webs. but not falling into them.");
+        super(SixBees.CATEGORY, "anti-web", "Prevents you from walking into webs. (but not falling into them)");
     }
 
     @EventHandler
     private void onCollisionShape(CollisionShapeEvent event) {
         if (mc.level == null || mc.player == null) return;
-        if (event.state.getBlock() == Blocks.COBWEB && mc.player.fallDistance <= 0) event.shape = Shapes.block();
+        if (event.state.getBlock() == Blocks.COBWEB
+            && (mc.player.fallDistance <= 0 || mc.player.isFallFlying())
+            && !mc.level.getBlockState(mc.player.blockPosition()).is(Blocks.COBWEB)
+            && !mc.level.getBlockState(mc.player.blockPosition().above()).is(Blocks.COBWEB)
+        ) {
+            event.shape = Shapes.block();
+        }
     }
 }
 
