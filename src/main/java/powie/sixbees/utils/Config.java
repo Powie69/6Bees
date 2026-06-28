@@ -110,7 +110,7 @@ public class Config {
                 try {
                     Files.writeString(MAPS_FILE, data);
                     MeteorClient.EVENT_BUS.post(new NewMapsDataEvent(result));
-                    LOG.info("Maps config updated");
+                    LOG.info("Maps config updated: {}", result);
                 } catch (IOException e) {
                     LOG.warn("Failed to write maps file", e);
                 }

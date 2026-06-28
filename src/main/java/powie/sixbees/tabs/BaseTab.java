@@ -45,12 +45,11 @@ public class BaseTab extends Tab {
 
         public BaseTabScreen(GuiTheme theme, Tab tab) {
             super(theme, tab);
-            this.bases = readBases();
         }
 
         @Override
         public void initWidgets() {
-            this.bases = readBases();
+            bases = readBases();
             WTable table = add(theme.table()).expandX().minWidth(400).widget();
             initTable(table);
 
@@ -98,7 +97,7 @@ public class BaseTab extends Tab {
         private final BaseTabScreen parent;
 
         public AddBaseScreen(GuiTheme theme, Base base, String baseId, BaseTabScreen parent) {
-            super(theme, base != null ? "Edit \"" + base.name + "\"" : "New Place");
+            super(theme, base != null ? "Edit \"" + base.name + "\"" : "New Base");
             this.isEdit = base != null;
             this.parent = parent;
             this.base = base;

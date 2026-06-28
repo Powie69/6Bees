@@ -29,7 +29,6 @@ jobs:
 
       - name: Print SHA256 of built jar
         run: |
-          echo "### SHA256 Hashes" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           sha256sum build/libs/*.jar >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY

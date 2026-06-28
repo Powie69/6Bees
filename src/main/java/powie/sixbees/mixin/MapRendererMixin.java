@@ -34,9 +34,6 @@ public abstract class MapRendererMixin {
     public abstract void render(MapRenderState mapRenderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, boolean showOnlyFrame, int lightCoords);
 
     @Unique
-    private static final Set<Integer> nsfwMaps = NsfwBlock.NSFW_MAPS;
-
-    @Unique
     private static final Set<MapRenderState> blockedStates = Collections.newSetFromMap(new WeakHashMap<>());
 
     @Inject(
@@ -44,7 +41,7 @@ public abstract class MapRendererMixin {
         at = @At("TAIL")
     )
     private void onExtractRenderState(MapId mapId, MapItemSavedData mapData, MapRenderState state, CallbackInfo ci) {
-        if (nsfwMaps.contains(mapId.id())) {
+        if (NsfwBlock.NSFW_MAPS.contains(mapId.id())) {
             blockedStates.add(state); // This seems kinda janky if you know any better way please let me know
         } else {
             blockedStates.remove(state);
