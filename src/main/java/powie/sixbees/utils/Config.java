@@ -3,9 +3,8 @@ package powie.sixbees.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
-import meteordevelopment.meteorclient.MeteorClient;
 import net.fabricmc.loader.api.FabricLoader;
-import powie.sixbees.events.NewMapsDataEvent;
+import powie.sixbees.modules.NsfwBlock;
 import powie.sixbees.utils.BaseUtils.Base;
 
 import java.io.IOException;
@@ -25,7 +24,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static powie.sixbees.SixBees.LOG;
-import static powie.sixbees.utils.Checks.isDevEnvOrHasExtraArgs;
 
 public class Config {
     private static final Gson GSON = new Gson();
@@ -105,12 +103,15 @@ public class Config {
                 }
 
                 Set<Integer> result = GSON.fromJson(data, MAPS_TYPE);
-                if (result == null || result.isEmpty()) return;
+                if (result == null || result.isEmpty()) {
+                    LOG.error("Failed to parse maps config");
+                    return;
+                }
 
                 try {
                     Files.writeString(MAPS_FILE, data);
-                    MeteorClient.EVENT_BUS.post(new NewMapsDataEvent(result));
-                    LOG.info("Maps config updated: {}", result);
+                    NsfwBlock.NSFW_MAPS.set(result);
+                    LOG.info("Maps config updated");
                 } catch (IOException e) {
                     LOG.warn("Failed to write maps file", e);
                 }

@@ -12,6 +12,7 @@ import net.minecraft.util.Util;
 import powie.sixbees.SixBees;
 
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static powie.sixbees.utils.Checks.isDevEnvOrHasExtraArgs;
 import static powie.sixbees.utils.Config.readMaps;
@@ -30,7 +31,7 @@ public class NsfwBlock extends Module {
         super(SixBees.CATEGORY, "nsfw-blocker", "Blocks rendering of nsfw map arts");
     }
 
-    public static Set<Integer> NSFW_MAPS = readMaps();
+    public static final AtomicReference<Set<Integer>> NSFW_MAPS = new AtomicReference<>(readMaps());
 
     @Override
     public WWidget getWidget(GuiTheme theme) {

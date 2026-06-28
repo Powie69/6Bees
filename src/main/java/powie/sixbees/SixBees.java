@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import powie.sixbees.commands.AddBase;
 import powie.sixbees.commands.GetMapId;
 import powie.sixbees.events.ChatListener;
-import powie.sixbees.events.MapsDataListener;
 import powie.sixbees.hud.SixBeesStarscript;
 import powie.sixbees.hud.TextPresets;
 import powie.sixbees.modules.*;
@@ -34,10 +33,6 @@ public class SixBees extends MeteorAddon {
     @Override
     public void onInitialize() {
         LOG.info("Initializing 6 Bees");
-
-        // Event listeners
-        new ChatListener();
-        new MapsDataListener();
 
         initializeConfig();
 
@@ -72,6 +67,9 @@ public class SixBees extends MeteorAddon {
 
         // Tabs
         Tabs.add(new BaseTab());
+
+        // Event listeners
+        new ChatListener();
     }
 
     @Override

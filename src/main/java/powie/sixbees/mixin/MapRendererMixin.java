@@ -41,7 +41,7 @@ public abstract class MapRendererMixin {
         at = @At("TAIL")
     )
     private void onExtractRenderState(MapId mapId, MapItemSavedData mapData, MapRenderState state, CallbackInfo ci) {
-        if (NsfwBlock.NSFW_MAPS.contains(mapId.id())) {
+        if (NsfwBlock.NSFW_MAPS.get().contains(mapId.id())) {
             blockedStates.add(state); // This seems kinda janky if you know any better way please let me know
         } else {
             blockedStates.remove(state);
