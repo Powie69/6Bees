@@ -25,9 +25,9 @@ public class BaseUtils {
             BlockPos scaledPos = convertCoords(playerPos, playerDimension, base.dimension);
             if (scaledPos == null) continue;
 
-            int dx = scaledPos.getX() - base.coords.getX();
-            int dz = scaledPos.getZ() - base.coords.getZ();
-            if (dx * dx + dz * dz <= base.radius * base.radius) return base.name;
+            long dx = scaledPos.getX() - base.coords.getX();
+            long dz = scaledPos.getZ() - base.coords.getZ();
+            if (dx * dx + dz * dz <= (long) base.radius * base.radius) return base.name;
         }
         return "";
     }
