@@ -8,7 +8,6 @@ import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
 import org.meteordev.starscript.value.Value;
 import org.meteordev.starscript.value.ValueMap;
-import powie.sixbees.events.TeleportMessageEvent;
 import powie.sixbees.utils.BaseUtils;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -18,16 +17,12 @@ public class SixBeesStarscript {
     private static int tpSeconds;
     private static String tpDestination = "";
 
-    /**
-     * Maybe I could have done the {@link powie.sixbees.events.ChatListener} stuff here?
-     */
-    private static class EventListener {
-        @EventHandler
-        private void onTeleportMessage(TeleportMessageEvent event) {
-            if (event.seconds != -1) tpSeconds = event.seconds * 20;
-            if (event.destination != null) tpDestination = event.destination;
-        }
+    public static void setTpFields(int seconds, String destination) {
+        if (seconds != -1) tpSeconds = seconds * 20;
+        if (destination != null) tpDestination = destination;
+    }
 
+    private static class EventListener {
         @EventHandler
         private void onTick(TickEvent.Post event) {
             if (tpSeconds > 0) tpSeconds--;

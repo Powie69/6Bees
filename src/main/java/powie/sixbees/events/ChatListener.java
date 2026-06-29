@@ -10,6 +10,8 @@ import powie.sixbees.utils.Checks;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static powie.sixbees.hud.SixBeesStarscript.setTpFields;
+
 public class ChatListener {
     private static final Pattern YOU_TO_OTHER_PATTERN = Pattern.compile("^Teleporting in (\\d+) seconds\\.\\.\\. \\[Cancel]$");
     private static final Pattern REQUEST_ACCEPT_PATTERN = Pattern.compile("^Your request sent to (.+?) was accepted!$");
@@ -51,7 +53,7 @@ public class ChatListener {
         handleHotspotTeleport(message);
         // tpa and home failure doesn't have the same message
         if (message.equals("Teleport failed!") || message.equals("Teleport failed.")) {
-            MeteorClient.EVENT_BUS.post(new TeleportMessageEvent(0, ""));
+            setTpFields(0, "");
         }
     }
 
@@ -61,7 +63,7 @@ public class ChatListener {
         if (!matcher.matches()) return;
 
         int seconds = Integer.parseInt((matcher.group(1)));
-        MeteorClient.EVENT_BUS.post(new TeleportMessageEvent(seconds, null));
+        setTpFields(seconds, null);
     }
 
     private void handleRequestAccept(String message) {
@@ -69,7 +71,7 @@ public class ChatListener {
         if (!matcher.matches()) return;
 
         String destination = matcher.group(1);
-        MeteorClient.EVENT_BUS.post(new TeleportMessageEvent(-1, destination));
+        setTpFields(-1, destination);
     }
 
     private void handleOtherToYou(String message) {
@@ -77,7 +79,7 @@ public class ChatListener {
         if (!matcher.matches()) return;
         // its always 15 right??
         String destination = matcher.group(1);
-        MeteorClient.EVENT_BUS.post(new TeleportMessageEvent(15, destination));
+        setTpFields(15, destination);
     }
 
     private void handleHomeTeleport(String message) {
@@ -86,7 +88,7 @@ public class ChatListener {
 
         String destination = matcher.group(1);
         int seconds = Integer.parseInt(matcher.group(2));
-        MeteorClient.EVENT_BUS.post(new TeleportMessageEvent(seconds, destination));
+        setTpFields(seconds, destination);
     }
 
     private void handleHotspotTeleport(String message) {
@@ -95,7 +97,7 @@ public class ChatListener {
 
         String destination = matcher.group(1);
         int seconds = Integer.parseInt(matcher.group(2));
-        MeteorClient.EVENT_BUS.post(new TeleportMessageEvent(seconds, destination));
+        setTpFields(seconds, destination);
     }
 
     // pvp mode
