@@ -41,15 +41,15 @@ public class BaseTab extends Tab {
     }
 
     public static class BaseTabScreen extends WindowTabScreen {
-        private Map<String, Base> bases;
+        public Map<String, Base> bases;
 
         public BaseTabScreen(GuiTheme theme, Tab tab) {
             super(theme, tab);
+            bases = readBases();
         }
 
         @Override
         public void initWidgets() {
-            bases = readBases();
             WTable table = add(theme.table()).expandX().minWidth(400).widget();
             initTable(table);
 
@@ -80,7 +80,7 @@ public class BaseTab extends Tab {
 
                     WConfirmedMinus delete = table.add(theme.confirmedMinus()).right().widget();
                     delete.action = () -> {
-                        BaseUtils.removeBase(BaseKey);
+                        bases = BaseUtils.removeBase(BaseKey);
                         reload();
                     };
 
@@ -98,11 +98,11 @@ public class BaseTab extends Tab {
 
         public AddBaseScreen(GuiTheme theme, Base base, String baseId, BaseTabScreen parent) {
             super(theme, base != null ? "Edit \"" + base.name + "\"" : "New Base");
+            settings = new AddBaseSettings();
             this.isEdit = base != null;
-            this.parent = parent;
             this.base = base;
             this.baseId = baseId;
-            settings = new AddBaseSettings();
+            this.parent = parent;
         }
 
         @Override
@@ -132,14 +132,17 @@ public class BaseTab extends Tab {
 
         private void saveCoords() {
             if (settings.name.get().isEmpty()) return;
-            BaseUtils.saveBase(
+            Map<String, Base> newBaseData = BaseUtils.saveBase(
                 baseId,
                 new Base(
                     settings.name.get().trim(),
                     settings.coords.get(),
                     settings.radius.get(),
                     settings.dimension.get()));
-            if (parent != null) parent.reload();
+            if (parent != null) {
+                parent.bases = newBaseData;
+                parent.reload();
+            }
             mc.setScreen(parent);
         }
     }
@@ -168,7 +171,6 @@ public class BaseTab extends Tab {
             .defaultValue(10000)
             .noSlider()
             .min(1)
-            .max(Integer.MAX_VALUE)
             .build()
         );
 

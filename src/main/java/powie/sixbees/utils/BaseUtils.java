@@ -48,16 +48,18 @@ public class BaseUtils {
         return null;
     }
 
-    public static void saveBase(String key, Base base) {
+    public static Map<String, Base> saveBase(String key, Base base) {
         Map<String, Base> bases = readBases();
         bases.put(key, base);
         Config.writeBases(bases);
+        return bases;
     }
 
-    public static void removeBase(String key) {
+    public static Map<String, Base> removeBase(String key) {
         Map<String, Base> bases = readBases();
         bases.remove(key);
         Config.writeBases(bases);
+        return bases;
     }
 
     public static class Base {
