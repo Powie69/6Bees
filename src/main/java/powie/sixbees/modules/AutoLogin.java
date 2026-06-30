@@ -1,10 +1,7 @@
 package powie.sixbees.modules;
 
-/**
- * Not added by default because every addon has this ngl
- */
-
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
+import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.settings.StringSetting;
@@ -15,6 +12,13 @@ import powie.sixbees.SixBees;
 
 public class AutoLogin extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<Boolean> disableOnRun = sgGeneral.add(new BoolSetting.Builder()
+        .name("disable-on-run")
+        .description("Disables the module after the first run")
+        .defaultValue(true)
+        .build()
+    );
 
     private final Setting<String> command = sgGeneral.add(new StringSetting.Builder()
         .name("command")
@@ -31,15 +35,18 @@ public class AutoLogin extends Module {
         .build()
     );
 
-
+    /**
+     * Not added by default because every addon has this ngl
+     */
     public AutoLogin() {
         super(SixBees.CATEGORY, "auto-login", "Runs /login command when you join a server.");
-        runInMainMenu = true;
     }
 
     @EventHandler
     private void onGameJoined(GameJoinedEvent event) {
+        if (mc.isSingleplayer()) return;
         ChatUtils.sendPlayerMsg(command.get() + " " + password.get());
+        if (disableOnRun.get()) disable();
     }
 
 }

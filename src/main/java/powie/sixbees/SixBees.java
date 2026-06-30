@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.systems.hud.HudGroup;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.PostInit;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import powie.sixbees.commands.AddBase;
@@ -70,6 +71,11 @@ public class SixBees extends MeteorAddon {
 
         // Event listeners
         new ChatListener();
+    }
+
+    @PostInit
+    public static void postInit() {
+        if (isDevEnvOrHasExtraArgs()) Modules.get().get(AutoLogin.class).enable();
     }
 
     @Override
