@@ -40,6 +40,7 @@ public class AutoLogin extends Module {
      */
     public AutoLogin() {
         super(SixBees.CATEGORY, "auto-login", "Runs /login command when you join a server.");
+        runInMainMenu = true;
     }
 
     @EventHandler

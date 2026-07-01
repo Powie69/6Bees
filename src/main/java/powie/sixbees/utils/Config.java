@@ -147,7 +147,7 @@ public class Config {
             return result != null ? result : new HashMap<>();
         } catch (IOException e) {
             cachedBases = null;
-            throw new RuntimeException("Failed to read bases config", e); // Minecraft pls don't catch my shit i wanna crash it
+            throw new RuntimeException("Failed to read bases config", e);
         } catch (JsonParseException e) {
             LOG.error("Failed to parse bases config", e);
             cachedBases = null;

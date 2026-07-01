@@ -1,5 +1,6 @@
 package powie.sixbees.modules;
 
+import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.GuiThemes;
@@ -12,7 +13,12 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import powie.sixbees.SixBees;
 import powie.sixbees.tabs.BaseTab;
@@ -68,7 +74,12 @@ public class AntiBaseLeak extends Module {
             // Don't print message if player ins't valid (not online). In my opinion it's bad ux
             if (mc.getConnection().getPlayerInfoIgnoreCase(secondArgument) == null) return;
             event.cancel();
-            info("Prevented tpa accept from " + secondArgument);
+            MutableComponent warningMessage = Component.literal("Prevented tpa accept from: " + secondArgument);
+            warningMessage.append(getSendButton("/tpy" + secondArgument));
+            ChatUtils.sendMsg(warningMessage);
+
+//            info("Prevented tpa accept from " + secondArgument);
+
         }
 
         if (preventHotspot.get()
@@ -78,6 +89,15 @@ public class AntiBaseLeak extends Module {
             event.cancel();
             info("Prevented hotspot creation");
         }
+    }
+
+    private MutableComponent getSendButton(String message) {
+        MutableComponent sendButton = Component.literal("[ACCEPT ANYWAY]");
+
+        sendButton.setStyle(sendButton.getStyle()
+            .applyFormat(ChatFormatting.YELLOW)
+            .withClickEvent(new MeteorClickEvent(Commands.get("say").toString(message))));
+        return sendButton;
     }
 
 }
