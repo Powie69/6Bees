@@ -1,19 +1,17 @@
 package powie.sixbees.modules;
 
-import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
-import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
+import meteordevelopment.meteorclient.utils.misc.text.RunnableClickEvent;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.ChatFormatting;
@@ -51,11 +49,13 @@ public class AntiBaseLeak extends Module {
 
     @Override
     public WWidget getWidget(GuiTheme theme) {
-        WVerticalList l = theme.verticalList();
-        WButton button = l.add(theme.button("Manage Bases")).widget();
+        WButton button = theme.button("Manage Bases");
         button.action = () -> mc.setScreen(Tabs.get(BaseTab.class).createScreen(GuiThemes.get()));
         return button;
     }
+
+    private String acceptAnyway;
+    private boolean createAnyway;
 
     public AntiBaseLeak() {
         super(SixBees.CATEGORY, "anti-base-leak", "Prevents you from leaking your base");
@@ -65,39 +65,68 @@ public class AntiBaseLeak extends Module {
     private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof ServerboundChatCommandPacket p)) return;
         String command = p.command().toLowerCase();
-        String[] parts = command.split(" ");
+        String[] parts = command.split(" ", 3);
         String secondArgument = parts.length > 1 ? parts[1].toLowerCase() : "";
 
-        if (preventTpa.get() && command.startsWith("tpy") && !secondArgument.isEmpty()) {
-            if (allowFriendsTpa.get() && Friends.get().get(secondArgument) != null) return;
-            if (!BaseUtils.isInBase()) return;
-            // Don't print message if player ins't valid (not online). In my opinion it's bad ux
-            if (mc.getConnection().getPlayerInfoIgnoreCase(secondArgument) == null) return;
-            event.cancel();
-            MutableComponent warningMessage = Component.literal("Prevented tpa accept from: " + secondArgument);
-            warningMessage.append(getSendButton("/tpy" + secondArgument));
-            ChatUtils.sendMsg(warningMessage);
+        handlePreventTpa(event, command, secondArgument);
 
-//            info("Prevented tpa accept from " + secondArgument);
-
-        }
-
-        if (preventHotspot.get()
-            && command.startsWith("hotspot")
-            && secondArgument.equals("create")
-            && BaseUtils.isInBase()) {
-            event.cancel();
-            info("Prevented hotspot creation");
-        }
+        handlePreventHotspot(event, command, secondArgument);
     }
 
-    private MutableComponent getSendButton(String message) {
-        MutableComponent sendButton = Component.literal("[ACCEPT ANYWAY]");
+    private void handlePreventTpa(PacketEvent.Send event, String command, String playerName) {
+        if (!preventTpa.get()) return;
+        if (!command.startsWith("tpy")) return;
+        if (playerName.isEmpty()) return;
 
-        sendButton.setStyle(sendButton.getStyle()
-            .applyFormat(ChatFormatting.YELLOW)
-            .withClickEvent(new MeteorClickEvent(Commands.get("say").toString(message))));
-        return sendButton;
+        if (allowFriendsTpa.get() && Friends.get().get(playerName) != null) return;
+        if (!BaseUtils.isInBase()) return;
+        if (mc.getConnection().getPlayerInfoIgnoreCase(playerName) == null) return;
+
+        if (acceptAnyway != null && acceptAnyway.equals("/tpy " + playerName)) {
+            acceptAnyway = null;
+            return;
+        }
+
+        event.cancel();
+
+        MutableComponent warningMessage = Component.literal("Prevented TPA accept from: " + playerName);
+        warningMessage.append(getSendAnywayButton("/tpy " + playerName));
+        ChatUtils.sendMsg(title, warningMessage);
     }
 
+    private void handlePreventHotspot(PacketEvent.Send event, String command, String secondArgument) {
+        if (!preventHotspot.get()) return;
+        if (!command.startsWith("hotspot") && !secondArgument.equals("create")) return;
+        if (!BaseUtils.isInBase()) return;
+
+        if (createAnyway) {
+            createAnyway = false;
+            return;
+        }
+
+        event.cancel();
+
+        MutableComponent warningMessage = Component.literal("Prevented hotspot creation");
+        warningMessage.append(Component.literal(" [CREATE ANYWAY]")
+            .withStyle(style -> style
+                .applyFormat(ChatFormatting.YELLOW)
+                .withClickEvent(new RunnableClickEvent(() -> {
+                    createAnyway = true;
+                    ChatUtils.sendPlayerMsg("/hotspot create");
+                }))
+            )
+        );
+        ChatUtils.sendMsg(title, warningMessage);
+    }
+
+    private MutableComponent getSendAnywayButton(String command) {
+        return Component.literal(" [ACCEPT ANYWAY]")
+            .withStyle(style -> style
+                .applyFormat(ChatFormatting.YELLOW)
+                .withClickEvent(new RunnableClickEvent(() -> {
+                    acceptAnyway = command;
+                    ChatUtils.sendPlayerMsg(command);
+                }))
+            );
+    }
 }
