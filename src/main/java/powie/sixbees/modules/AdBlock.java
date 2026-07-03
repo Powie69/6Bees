@@ -63,13 +63,13 @@ public class AdBlock extends Module {
 
     @EventHandler
     private void onMessageReceive(ReceiveMessageEvent event) {
-        if (!filterChat.get()) return;
         String message = event.getMessage().getString();
 
-        if (message.startsWith("---------------------------")
-            || message.startsWith("Please add your email ")) {
-            event.cancel();
-            return;
+        if (filterChat.get()) {
+            if (message.startsWith("---------------------------") || message.startsWith("Please add your email ")) {
+                event.cancel();
+                return;
+            }
         }
 
         if (discordlinks.get() && discordLinkPattern.matcher(message).find()) event.cancel();

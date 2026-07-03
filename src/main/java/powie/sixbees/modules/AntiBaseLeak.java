@@ -47,18 +47,18 @@ public class AntiBaseLeak extends Module {
         .build()
     );
 
-    @Override
-    public WWidget getWidget(GuiTheme theme) {
-        WButton button = theme.button("Manage Bases");
-        button.action = () -> mc.setScreen(Tabs.get(BaseTab.class).createScreen(GuiThemes.get()));
-        return button;
-    }
-
     private String acceptAnyway;
     private boolean createAnyway;
 
     public AntiBaseLeak() {
         super(SixBees.CATEGORY, "anti-base-leak", "Prevents you from leaking your base");
+    }
+
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        WButton button = theme.button("Manage Bases");
+        button.action = () -> mc.setScreen(Tabs.get(BaseTab.class).createScreen(GuiThemes.get()));
+        return button;
     }
 
     @EventHandler
@@ -90,13 +90,16 @@ public class AntiBaseLeak extends Module {
         event.cancel();
 
         MutableComponent warningMessage = Component.literal("Prevented TPA accept from: " + playerName);
-        warningMessage.append(getSendAnywayButton("/tpy " + playerName));
+        warningMessage.append(createActionButton(" [ACCEPT ANYWAY] ", () -> {
+            acceptAnyway = "/tpy " + playerName;
+            ChatUtils.sendPlayerMsg("/tpy " + playerName);
+        }));
         ChatUtils.sendMsg(title, warningMessage);
     }
 
     private void handlePreventHotspot(PacketEvent.Send event, String command, String secondArgument) {
         if (!preventHotspot.get()) return;
-        if (!command.startsWith("hotspot") && !secondArgument.equals("create")) return;
+        if (!command.startsWith("hotspot") || !(secondArgument.equals("create") || secondArgument.equals("protectedcreate"))) return;
         if (!BaseUtils.isInBase()) return;
 
         if (createAnyway) {
@@ -107,26 +110,18 @@ public class AntiBaseLeak extends Module {
         event.cancel();
 
         MutableComponent warningMessage = Component.literal("Prevented hotspot creation");
-        warningMessage.append(Component.literal(" [CREATE ANYWAY]")
-            .withStyle(style -> style
-                .applyFormat(ChatFormatting.YELLOW)
-                .withClickEvent(new RunnableClickEvent(() -> {
-                    createAnyway = true;
-                    ChatUtils.sendPlayerMsg("/hotspot create");
-                }))
-            )
-        );
+        warningMessage.append(createActionButton(" [CREATE ANYWAY]", () -> {
+            createAnyway = true;
+            ChatUtils.sendPlayerMsg("/hotspot create");
+        }));
         ChatUtils.sendMsg(title, warningMessage);
     }
 
-    private MutableComponent getSendAnywayButton(String command) {
-        return Component.literal(" [ACCEPT ANYWAY]")
+    private MutableComponent createActionButton(String text, Runnable onClick) {
+        return Component.literal(text)
             .withStyle(style -> style
                 .applyFormat(ChatFormatting.YELLOW)
-                .withClickEvent(new RunnableClickEvent(() -> {
-                    acceptAnyway = command;
-                    ChatUtils.sendPlayerMsg(command);
-                }))
+                .withClickEvent(new RunnableClickEvent(onClick))
             );
     }
 }
