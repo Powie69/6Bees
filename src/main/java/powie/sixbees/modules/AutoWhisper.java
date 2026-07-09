@@ -91,11 +91,11 @@ public class AutoWhisper extends Module {
 
     @Override
     public void onActivate() {
-        if (!validateMessageToSend()) toggle();
         if (messageToSend.get().isEmpty()) {
             error("There are no specified messages to send!");
             toggle();
         }
+        validateMessageToSend();
         if (!is6B6T()) {
             error("This module is only compatible with 6B6T");
             toggle();
@@ -143,12 +143,8 @@ public class AutoWhisper extends Module {
         messageCooldown = cooldown.get();
     }
 
-    private boolean validateMessageToSend() {
-        if (messageToSend.get().removeIf(String::isBlank)) {
-            error("Removing empty messages");
-            return false;
-        }
-        return true;
+    private void validateMessageToSend() {
+        if (messageToSend.get().removeIf(String::isBlank)) error("Removing empty messages");
     }
 
     private void compileKeywordRegexList() {

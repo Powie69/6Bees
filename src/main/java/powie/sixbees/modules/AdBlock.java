@@ -53,16 +53,14 @@ public class AdBlock extends Module {
 
     @Override
     public void onActivate() {
-        if (!is6B6T()) {
-            error("This module is only compatible with 6b6t");
-            toggle();
-        }
-
+        if (!is6B6T()) error("This module is only compatible with 6b6t");
+        
         if (isAllSettingsOff()) toggle();
     }
 
     @EventHandler
     private void onMessageReceive(ReceiveMessageEvent event) {
+        if (!is6B6T()) return;
         String message = event.getMessage().getString();
 
         if (filterChat.get()) {
@@ -77,6 +75,7 @@ public class AdBlock extends Module {
 
     @EventHandler
     private void onRenderBossBar(RenderBossBarEvent.BossIterator event) {
+        if (!is6B6T()) return;
         if (!filterWithers.get()) return;
 
         List<LerpingBossEvent> filtered = new ArrayList<>();
