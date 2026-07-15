@@ -18,11 +18,8 @@ public class BaseUtils {
         Map<String, Base> bases = readBases();
         if (bases.isEmpty()) return "";
 
-        BlockPos playerPos = mc.player.blockPosition();
-        Dimension playerDimension = getDimension();
-
         for (Base base : bases.values()) {
-            BlockPos scaledPos = convertCoords(playerPos, playerDimension, base.dimension);
+            BlockPos scaledPos = convertCoords(mc.player.blockPosition(), getDimension(), base.dimension);
             if (scaledPos == null) continue;
 
             long dx = scaledPos.getX() - base.coords.getX();

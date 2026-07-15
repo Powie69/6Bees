@@ -14,7 +14,8 @@ public class TextPresets {
 
     static {
         addPreset("Base name", "Base: #1{sixbees.base}", 10);
-        addPreset("Protected position", "Pos#1{floor(sixbees.protected_pos.x)}, {floor(camera.pos.y)}, {floor(sixbees.protected_pos.z)}", 1);
+        addPreset("Protected position", "Pos: #1{floor(sixbees.protected_pos.x)}, {floor(camera.pos.y)}, {floor(sixbees.protected_pos.z)}", 1);
+        addPreset("Protected opposite position", "{player.opposite_dimension != \"End\" ? player.opposite_dimension + \":\" : \"\"} #1{player.opposite_dimension != \"End\" ? \"\" + floor(sixbees.opposite_dim_protected.x) + \", \" + floor(camera.opposite_dim_pos.y) + \", \" + floor(sixbees.opposite_dim_protected.z) : \"\"}", 1);
         addPreset("Teleport countdown", "Tp countdown: #1{sixbees.tp.countdown}", 1);
         addPreset("Teleport destination", "Tp destination: #1{sixbees.tp.destination}", 1);
     }

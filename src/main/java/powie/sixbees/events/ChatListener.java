@@ -58,7 +58,7 @@ public class ChatListener {
     }
 
     // teleports
-    private void handleYouToOther(String message) {
+    private static void handleYouToOther(String message) {
         Matcher matcher = YOU_TO_OTHER_PATTERN.matcher(message);
         if (!matcher.matches()) return;
 
@@ -66,7 +66,7 @@ public class ChatListener {
         setTpFields(seconds, null);
     }
 
-    private void handleRequestAccept(String message) {
+    private static void handleRequestAccept(String message) {
         Matcher matcher = REQUEST_ACCEPT_PATTERN.matcher(message);
         if (!matcher.matches()) return;
 
@@ -74,7 +74,7 @@ public class ChatListener {
         setTpFields(-1, destination);
     }
 
-    private void handleOtherToYou(String message) {
+    private static void handleOtherToYou(String message) {
         Matcher matcher = OTHER_TO_YOU_PATTERN.matcher(message);
         if (!matcher.matches()) return;
         // its always 15 right??
@@ -82,7 +82,7 @@ public class ChatListener {
         setTpFields(15, destination);
     }
 
-    private void handleHomeTeleport(String message) {
+    private static void handleHomeTeleport(String message) {
         Matcher matcher = HOME_TELEPORT_PATTERN.matcher(message);
         if (!matcher.matches()) return;
 
@@ -91,17 +91,12 @@ public class ChatListener {
         setTpFields(seconds, destination);
     }
 
-    private void handleHotspotTeleport(String message) {
+    private static void handleHotspotTeleport(String message) {
         Matcher matcher = HOTSPOT_TELEPORT_PATTERN.matcher(message);
         if (!matcher.matches()) return;
 
         String destination = matcher.group(1);
         int seconds = Integer.parseInt(matcher.group(2));
         setTpFields(seconds, destination);
-    }
-
-    // pvp mode
-    private void handlePvpMode(String message) {
-        // TODO
     }
 }

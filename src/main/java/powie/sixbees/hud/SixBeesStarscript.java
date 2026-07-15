@@ -34,6 +34,7 @@ public class SixBeesStarscript {
 
         MeteorStarscript.ss.set("sixbees", new ValueMap()
             .set("base", SixBeesStarscript::handleBase)
+            .set("is_in_base", () -> Value.bool(mc.player != null && isInBase()))
 
             .set("tp", new ValueMap()
                 .set("countdown", () -> Value.number((double) tpSeconds / 20))
@@ -70,15 +71,16 @@ public class SixBeesStarscript {
 
     private static Value handleProtectedPosOpposite(String axis) {
         if (mc.player == null) return Value.number(0);
+        Dimension dimension = PlayerUtils.getDimension();
+        if (dimension == Dimension.End) return Value.number(0);
         if (isInBase()) return Value.number(0);
 
         double val = switch (axis) {
             case "x" -> mc.player.getX();
-            case "y" -> mc.player.getY();
+            case "z" -> mc.player.getZ();
             default -> throw new IllegalArgumentException("Invalid axis: " + axis);
         };
 
-        Dimension dimension = PlayerUtils.getDimension();
         if (dimension == Dimension.Overworld) val /= 8;
         else if (dimension == Dimension.Nether) val *= 8;
 

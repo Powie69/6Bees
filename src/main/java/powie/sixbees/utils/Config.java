@@ -56,9 +56,9 @@ public class Config {
             Files.createFile(file);
             LOG.info("Created config file: {}", file.getFileName());
         } catch (FileAlreadyExistsException e) {
-            LOG.info("Config file already exists: {}", file.getFileName());
+            LOG.info("Config file already exists: {}", file.toAbsolutePath());
         } catch (IOException e) {
-            throw new RuntimeException("Failed to create config file: " + file.getFileName(), e);
+            throw new RuntimeException("Failed to create config file: " + file.toAbsolutePath(), e);
         }
     }
 
