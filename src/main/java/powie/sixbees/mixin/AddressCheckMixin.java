@@ -9,15 +9,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static powie.sixbees.SixBees.LOG;
-
 @NullMarked
 @Mixin(value = AddressCheck.class, priority = 900)
 public interface AddressCheckMixin {
     @Inject(method = "createFromService", at = @At("HEAD"), cancellable = true)
     private static void onCreateFromService(CallbackInfoReturnable<AddressCheck> cir) {
-        LOG.info("AddressCheckMixin: onCreateFromService");
-
         cir.setReturnValue(new AddressCheck() {
             @Override
             public boolean isAllowed(ResolvedServerAddress address) {
