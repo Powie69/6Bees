@@ -45,7 +45,6 @@ public class BaseMacro extends Module {
         .build()
     );
 
-
     // Enter
     private final List<Script> enterCommandsCompiledList = new ArrayList<>();
 
@@ -72,11 +71,8 @@ public class BaseMacro extends Module {
 
     private final Queue<Script> commandsToRun = new ArrayDeque<>();
 
-    private int checkDelayAccumulator = 0;
-    private int intervalDelayAccumulator = 0;
-    private boolean isFirstCommand;
-    private boolean isRunning;
-    private boolean isCurrentlyInsideOfBase;
+    private int checkDelayAccumulator, intervalDelayAccumulator;
+    private boolean isFirstCommand, isRunning, isCurrentlyInsideOfBase;
     private Vec3 lastPlayerPos;
 
     public BaseMacro() {
@@ -93,7 +89,6 @@ public class BaseMacro extends Module {
         }
     }
 
-    // Run commands
     @EventHandler
     private void onTick(TickEvent.Post event) {
         commandExecution();
