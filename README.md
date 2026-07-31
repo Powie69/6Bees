@@ -21,6 +21,7 @@ Please give suggestions on [issues tab](https://github.com/Powie69/6Bees/issues)
 - **Anti tinnitus**: Prevents ear strain and tinnitus during intense Crystal PvP.
 - **Anti Web**: Prevents you from walking into webs. (but not falling into them)
 - **Auto Whisper**: Automatically whispers a message to someone whenever they say a specified keyword.
+- **Base Macro**: Runs a macro when you enter and leave a base.
 - **Free Home**: Gives you 2 extra free homes (Not clickbait I swear)
 - **NSFW maparts blocker**: Blocks rendering of naughty maparts. This will reference a database.
 - **Show Map Id**: Will always show the map ID of maps in its tooltips.

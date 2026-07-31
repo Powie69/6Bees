@@ -2,7 +2,12 @@ package powie.sixbees.modules;
 
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.GuiThemes;
+import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.gui.utils.StarscriptTextBoxRenderer;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -14,6 +19,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.world.phys.Vec3;
 import org.meteordev.starscript.Script;
 import powie.sixbees.SixBees;
+import powie.sixbees.tabs.BaseTab;
 import powie.sixbees.utils.BaseUtils;
 
 import java.util.ArrayDeque;
@@ -87,6 +93,14 @@ public class BaseMacro extends Module {
             error("There's no commands to run.");
             toggle();
         }
+        removeEmptyCommands();
+    }
+
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        WButton button = theme.button("Manage Bases");
+        button.action = () -> mc.setScreen(Tabs.get(BaseTab.class).createScreen(GuiThemes.get()));
+        return button;
     }
 
     @EventHandler
@@ -137,6 +151,11 @@ public class BaseMacro extends Module {
         isRunning = true;
     }
 
+    private void removeEmptyCommands() {
+        if (enterCommands.get().removeIf(String::isBlank)) warning("Removing empty enter commands");
+        if (leaveCommands.get().removeIf(String::isBlank)) warning("Removing empty leave commands");
+    }
+
     private void compileCommands(List<String> rawList, List<Script> compiledList) {
         compiledList.clear();
 
@@ -145,7 +164,7 @@ public class BaseMacro extends Module {
                 compiledList.add(MeteorStarscript.compile(s));
             } catch (Exception e) {
                 error("Failed to compile command: " + s);
-                toggle();
+                disable();
                 return;
             }
         }
