@@ -29,12 +29,12 @@ Please give suggestions on [issues tab](https://github.com/Powie69/6Bees/issues)
 ### HUD
 - **Base Name**: Shows the name of your current base.
 - **Protected Position**: Shows your xyz coordinates unless if you're inside a base.
-- **Teleport countdown**: Shows a countdown timer for your next teleportation (e.g when someone accepts your /tpa).
+- **Teleport countdown**: Shows a countdown timer for your next teleportation (e.g. when someone accepts your /tpa).
 - **Teleport Destination**: Shows where you're heading or who is currently teleporting to you. (e.g. /home /hotspot /tpy /tpa)
 
 ### Commands
 - **add-base**: Adds a new base to the base system.
-- **get-map-id**: Gets the map ID of the currrent map that you're looking at or holding
+- **get-map-id**: Gets the map ID of the current map that you're looking at or holding
 
 ### Base system
 
