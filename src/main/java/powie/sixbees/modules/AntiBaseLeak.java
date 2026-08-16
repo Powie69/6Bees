@@ -112,7 +112,7 @@ public class AntiBaseLeak extends Module {
         MutableComponent warningMessage = Component.literal("Prevented hotspot creation");
         warningMessage.append(createActionButton(" [CREATE ANYWAY]", () -> {
             createAnyway = true;
-            ChatUtils.sendPlayerMsg("/hotspot create");
+            ChatUtils.sendPlayerMsg("/hotspot " + secondArgument);
         }));
         ChatUtils.sendMsg(title, warningMessage);
     }

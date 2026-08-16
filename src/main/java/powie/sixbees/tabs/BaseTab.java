@@ -131,7 +131,7 @@ public class BaseTab extends Tab {
         }
 
         private void saveCoords() {
-            if (settings.name.get().isEmpty()) return;
+            if (settings.name.get().isBlank()) return;
             Map<String, Base> newBaseData = BaseUtils.saveBase(
                 baseId,
                 new Base(

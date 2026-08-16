@@ -23,8 +23,7 @@ public class NoBlockEntities extends Module {
         .name("render-radius")
         .description("The radius in which the blocks will render.")
         .defaultValue(0)
-        .min(0)
-        .sliderMax(128)
+        .range(0, 128)
         .build()
     );
 

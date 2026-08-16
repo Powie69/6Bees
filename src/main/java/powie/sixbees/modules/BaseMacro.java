@@ -8,10 +8,7 @@ import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.gui.utils.StarscriptTextBoxRenderer;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
-import meteordevelopment.meteorclient.settings.IntSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.settings.StringListSetting;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
@@ -48,6 +45,13 @@ public class BaseMacro extends Module {
         .min(1)
         .sliderMax(200)
         .defaultValue(20) // 1 second
+        .build()
+    );
+
+    private final Setting<Boolean> shouldAddToChatHistory = sgGeneral.add(new BoolSetting.Builder()
+        .name("add-to-chat-history")
+        .description("Whether to add executed commands to chat history")
+        .defaultValue(false)
         .build()
     );
 
@@ -121,7 +125,7 @@ public class BaseMacro extends Module {
             return;
         }
 
-        ChatUtils.sendPlayerMsg(MeteorStarscript.run(commandsToRun.poll()));
+        ChatUtils.sendPlayerMsg(MeteorStarscript.run(commandsToRun.poll()), shouldAddToChatHistory.get());
         isFirstCommand = false;
         intervalDelayAccumulator = 0;
 
@@ -145,9 +149,10 @@ public class BaseMacro extends Module {
     }
 
     private void prepareToRun(List<Script> list) {
+        isCurrentlyInsideOfBase = !isCurrentlyInsideOfBase;
+        if (list.isEmpty()) return;
         commandsToRun.addAll(list);
         isFirstCommand = true;
-        isCurrentlyInsideOfBase = !isCurrentlyInsideOfBase;
         isRunning = true;
     }
 

@@ -39,7 +39,7 @@ public class BaseUtils {
             return new BlockPos(pos.getX() * 8, pos.getY(), pos.getZ() * 8);
         }
         if (from == Dimension.Overworld && to == Dimension.Nether) {
-            return new BlockPos(pos.getX() / 8, pos.getY(), pos.getZ() / 8);
+            return new BlockPos(Math.floorDiv(pos.getX(), 8), pos.getY(), Math.floorDiv(pos.getZ(), 8));
         }
         // if there's no valid conversion (e.g. involving the End).
         return null;

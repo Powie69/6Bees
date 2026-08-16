@@ -39,6 +39,7 @@ public class ChatListener {
     @EventHandler
     private void onLeaveGame(GameLeftEvent event) {
         active = false;
+        setTpFields(0, "");
     }
 
     @EventHandler

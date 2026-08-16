@@ -25,7 +25,7 @@ jobs:
           java-version: 25
 
       - name: Build with Gradle
-        run: ./gradlew build -Pcommit=${{ github.sha }}
+        run: ./gradlew build
 
       - name: Print SHA256 of built jar
         run: |
