@@ -99,7 +99,8 @@ public class AntiBaseLeak extends Module {
 
     private void handlePreventHotspot(PacketEvent.Send event, String command, String secondArgument) {
         if (!preventHotspot.get()) return;
-        if (!command.startsWith("hotspot") || !(secondArgument.equals("create") || secondArgument.equals("protectedcreate"))) return;
+        if (!command.startsWith("hotspot") || !(secondArgument.equals("create") || secondArgument.equals("protectedcreate")))
+            return;
         if (!BaseUtils.isInBase()) return;
 
         if (createAnyway) {

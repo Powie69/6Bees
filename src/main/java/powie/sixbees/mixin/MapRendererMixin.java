@@ -1,7 +1,6 @@
 package powie.sixbees.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import net.minecraft.client.renderer.MapRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;

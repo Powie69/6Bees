@@ -1,6 +1,5 @@
 package powie.sixbees.modules;
 
-import powie.sixbees.SixBees;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.ColorSetting;
@@ -13,6 +12,7 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
+import powie.sixbees.SixBees;
 
 public class ModuleExample extends Module {
     private final SettingGroup sgGeneral = this.settings.getDefaultGroup();

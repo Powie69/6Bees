@@ -150,7 +150,7 @@ public class AutoWhisper extends Module {
     private void compileKeywordRegexList() {
         keywordRegexList.clear();
 
-        for (int i = 0; i < keywordRegex.get().size();) {
+        for (int i = 0; i < keywordRegex.get().size(); ) {
             try {
                 keywordRegexList.add(Pattern.compile(keywordRegex.get().get(i)));
                 i++;

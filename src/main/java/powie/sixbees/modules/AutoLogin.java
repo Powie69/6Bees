@@ -8,7 +8,6 @@ import meteordevelopment.meteorclient.settings.StringSetting;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.Minecraft;
 import powie.sixbees.SixBees;
 
 public class AutoLogin extends Module {
