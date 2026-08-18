@@ -57,14 +57,14 @@ public class AntiBaseLeak extends Module {
     @Override
     public WWidget getWidget(GuiTheme theme) {
         WButton button = theme.button("Manage Bases");
-        button.action = () -> mc.setScreen(Tabs.get(BaseTab.class).createScreen(GuiThemes.get()));
+        button.action = () -> mc.gui.setScreen(Tabs.get(BaseTab.class).createScreen(GuiThemes.get()));
         return button;
     }
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (!(event.packet instanceof ServerboundChatCommandPacket p)) return;
-        String command = p.command().toLowerCase();
+        if (!(event.packet instanceof ServerboundChatCommandPacket(String command1))) return;
+        String command = command1.toLowerCase();
         String[] parts = command.split(" ", 3);
         String secondArgument = parts.length > 1 ? parts[1].toLowerCase() : "";
 

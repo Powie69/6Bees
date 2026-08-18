@@ -56,7 +56,7 @@ public class BaseTab extends Tab {
             add(theme.horizontalSeparator()).expandX();
 
             WButton addNew = add(theme.button("Add new base")).expandX().widget();
-            addNew.action = () -> mc.setScreen(new AddBaseScreen(theme, null, UUID.randomUUID().toString(), this));
+            addNew.action = () -> mc.gui.setScreen(new AddBaseScreen(theme, null, UUID.randomUUID().toString(), this));
         }
 
         private void initTable(WTable table) {
@@ -76,7 +76,7 @@ public class BaseTab extends Tab {
                     table.add(theme.label(baseValue.name));
 
                     WButton edit = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().right().widget();
-                    edit.action = () -> mc.setScreen(new AddBaseScreen(theme, baseValue, BaseKey, this));
+                    edit.action = () -> mc.gui.setScreen(new AddBaseScreen(theme, baseValue, BaseKey, this));
 
                     WConfirmedMinus delete = table.add(theme.confirmedMinus()).right().widget();
                     delete.action = () -> {
@@ -127,7 +127,7 @@ public class BaseTab extends Tab {
             enterAction = this::saveCoords;
 
             WButton cancelBtn = actionButtons.add(theme.button("Cancel")).expandX().widget();
-            cancelBtn.action = () -> mc.setScreen(parent);
+            cancelBtn.action = () -> mc.gui.setScreen(parent);
         }
 
         private void saveCoords() {
@@ -143,7 +143,7 @@ public class BaseTab extends Tab {
                 parent.bases = newBaseData;
                 parent.reload();
             }
-            mc.setScreen(parent);
+            mc.gui.setScreen(parent);
         }
     }
 

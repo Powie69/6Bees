@@ -8,6 +8,7 @@ import meteordevelopment.meteorclient.settings.StringSetting;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.Minecraft;
 import powie.sixbees.SixBees;
 
 public class AutoLogin extends Module {
@@ -45,7 +46,7 @@ public class AutoLogin extends Module {
 
     @EventHandler
     private void onGameJoined(GameJoinedEvent event) {
-        if (mc.isSingleplayer()) return;
+        if (mc.hasSingleplayerServer()) return;
         ChatUtils.sendPlayerMsg(command.get() + " " + password.get());
         if (disableOnRun.get()) disable();
     }

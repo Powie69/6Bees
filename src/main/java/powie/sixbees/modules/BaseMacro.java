@@ -103,7 +103,7 @@ public class BaseMacro extends Module {
     @Override
     public WWidget getWidget(GuiTheme theme) {
         WButton button = theme.button("Manage Bases");
-        button.action = () -> mc.setScreen(Tabs.get(BaseTab.class).createScreen(GuiThemes.get()));
+        button.action = () -> mc.gui.setScreen(Tabs.get(BaseTab.class).createScreen(GuiThemes.get()));
         return button;
     }
 
