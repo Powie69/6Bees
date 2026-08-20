@@ -1,12 +1,4 @@
 {
-  "feature_directories": {
-    "commands": [
-      "commands"
-    ],
-    "modules": [
-      "modules"
-    ]
-  },
   "supported_versions": [
     "26.2",
     "26.1.2"
