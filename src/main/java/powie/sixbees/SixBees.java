@@ -19,6 +19,7 @@ import powie.sixbees.events.ChatListener;
 import powie.sixbees.hud.SixBeesStarscript;
 import powie.sixbees.hud.TextPresets;
 import powie.sixbees.modules.*;
+import powie.sixbees.modules.autoPearlStatis.AutoPearlStasis;
 import powie.sixbees.tabs.BaseTab;
 
 import java.util.List;
@@ -51,6 +52,7 @@ public class SixBees extends MeteorAddon {
         Modules.get().add(new AntiBedTrap());
         Modules.get().add(new AntiTinnitus());
         Modules.get().add(new AntiWeb());
+        Modules.get().add(new AutoPearlStasis());
         Modules.get().add(new AutoWhisper());
         Modules.get().add(new BaseMacro());
         Modules.get().add(new FreeHome());
