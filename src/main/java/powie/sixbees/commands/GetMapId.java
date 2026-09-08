@@ -17,16 +17,42 @@ public class GetMapId extends Command {
     @Override
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder.executes(_ -> {
-            if (mc.player.getMainHandItem().getItem() == Items.FILLED_MAP) {
-                info(String.valueOf(mc.player.getMainHandItem().get(DataComponents.MAP_ID).id()));
-            } else if (mc.player.getOffhandItem().getItem() == Items.FILLED_MAP) {
-                info(String.valueOf(mc.player.getOffhandItem().get(DataComponents.MAP_ID).id()));
-            } else if (mc.hitResult.getType() == HitResult.Type.ENTITY && ((EntityHitResult) mc.hitResult).getEntity() instanceof ItemFrame frame && frame.hasFramedMap()) {
-                info(String.valueOf(frame.getFramedMapId(frame.getItem()).id()));
+            Integer id = findMapId();
+
+            if (id != null) {
+                mc.keyboardHandler.setClipboard(String.valueOf(id));
+                info(id + " copied to clipboard.");
             } else {
                 error("You are not holding a map or looking at a map");
             }
+
             return SINGLE_SUCCESS;
         });
+
+        builder.then(literal("print").executes(_ -> {
+            Integer id = findMapId();
+
+            if (id != null) {
+                info(String.valueOf(id));
+            } else {
+                error("You are not holding a map or looking at a map");
+            }
+
+            return SINGLE_SUCCESS;
+        }));
+    }
+
+    private Integer findMapId() {
+        if (mc.player.getMainHandItem().getItem() == Items.FILLED_MAP) {
+            return mc.player.getMainHandItem().get(DataComponents.MAP_ID).id();
+        } else if (mc.player.getOffhandItem().getItem() == Items.FILLED_MAP) {
+            return mc.player.getOffhandItem().get(DataComponents.MAP_ID).id();
+        } else if (mc.hitResult.getType() == HitResult.Type.ENTITY
+            && ((EntityHitResult) mc.hitResult).getEntity() instanceof ItemFrame frame
+            && frame.hasFramedMap()) {
+            return frame.getFramedMapId(frame.getItem()).id();
+        }
+
+        return null;
     }
 }

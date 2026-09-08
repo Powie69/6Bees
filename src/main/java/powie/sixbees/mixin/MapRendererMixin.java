@@ -18,11 +18,11 @@ public abstract class MapRendererMixin {
         method = "extractRenderState",
         at = @At("TAIL")
     )
-    private void onExtractRenderState(MapId mapId, MapItemSavedData mapData, MapRenderState state, CallbackInfo ci) {
+    private void onExtractRenderState(MapId mapId, MapItemSavedData mapData, MapRenderState mapRenderState, CallbackInfo ci) {
         NsfwBlock nsfwBlockModule = Modules.get().get(NsfwBlock.class);
         if (nsfwBlockModule == null || !nsfwBlockModule.isActive()) return;
         if (!NsfwBlock.NSFW_MAPS.get().contains(mapId.id())) return;
-        if (!nsfwBlockModule.replace.get()) state.texture = Identifier.fromNamespaceAndPath("sixbees", "transparent.png");
-        else state.texture = Identifier.fromNamespaceAndPath("sixbees", "icon.png");
+        if (!nsfwBlockModule.replace.get()) mapRenderState.texture = Identifier.fromNamespaceAndPath("sixbees", "transparent.png");
+        else mapRenderState.texture = Identifier.fromNamespaceAndPath("sixbees", "icon.png");
     }
 }
