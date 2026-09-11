@@ -40,7 +40,8 @@ public class SixBees extends MeteorAddon {
         if (isDevEnvOrHasExtraArgs()) {
             // hacky way to avoid getting addon scrapped
             List<Module> devModules = List.of(
-                new AutoLogin()
+                new AutoLogin(),
+                new ExportMapId()
             );
             devModules.forEach(Modules.get()::add);
         }

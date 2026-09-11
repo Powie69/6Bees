@@ -27,8 +27,17 @@ public class NsfwBlock extends Module {
         .build()
     );
 
+    private Setting<Boolean> debugInfo;
+
     public NsfwBlock() {
         super(SixBees.CATEGORY, "nsfw-blocker", "Blocks rendering of nsfw map arts");
+
+        if (!isDevEnvOrHasExtraArgs()) return; // lol
+        debugInfo = sgGeneral.add(new BoolSetting.Builder()
+            .name("debug-info")
+            .description("Enables debug info")
+            .build()
+        );
     }
 
     public static final AtomicReference<Set<Integer>> NSFW_MAPS = new AtomicReference<>(readMaps());
@@ -44,6 +53,6 @@ public class NsfwBlock extends Module {
 
     @Override
     public void onActivate() {
-        if (isDevEnvOrHasExtraArgs()) info(NSFW_MAPS.toString());
+        if (isDevEnvOrHasExtraArgs() && debugInfo.get()) info(NSFW_MAPS.toString());
     }
 }
