@@ -23,7 +23,7 @@ public class ExportMapId extends Module {
     private final Setting<File> file = sgGeneral.add(new FileSetting.Builder()
         .name("file")
         .description("The file to write the map id to.")
-        .filter("txt")
+        .filter("*.txt")
         .build()
     );
 
@@ -41,8 +41,12 @@ public class ExportMapId extends Module {
         .build()
     );
 
+    /**
+     * I use this to add a LOT of map IDs for <a href="https://github.com/Powie69/6bees-data">6bees-data</a>
+     * @author Powie
+     */
     public ExportMapId() {
-        super(SixBees.CATEGORY, "export-map-id", "Export map ID you're looking at to file");
+        super(SixBees.CATEGORY, "export-map-id", "Export map ID you're looking at to file.");
     }
 
     private void handleWriteKey() {
@@ -50,13 +54,16 @@ public class ExportMapId extends Module {
             error("No file selected");
             return;
         }
-        if (!Utils.canUpdate() || mc.hitResult == null) return;
+
+        if (!Utils.canUpdate() || mc.gui.screen() != null || mc.hitResult == null) return;
         if (mc.hitResult.getType() == HitResult.Type.ENTITY
             && ((EntityHitResult) mc.hitResult).getEntity() instanceof ItemFrame frame
             && frame.hasFramedMap()) {
             String id = String.valueOf(frame.getFramedMapId(frame.getItem()).id());
             appendLine(file.get(), id);
             info(id + " added");
+        } else {
+            error("Not looking at a map");
         }
     }
 
@@ -65,7 +72,7 @@ public class ExportMapId extends Module {
             error("No file selected");
             return;
         }
-        if (!Utils.canUpdate()) return;
+        if (!Utils.canUpdate() || mc.gui.screen() != null) return;
         appendBlankLine(file.get());
         info("blank line added");
     }
