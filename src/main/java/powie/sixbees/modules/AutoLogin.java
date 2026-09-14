@@ -30,7 +30,6 @@ public class AutoLogin extends Module {
     private final Setting<String> password = sgGeneral.add(new StringSetting.Builder()
         .name("password")
         .description("The password to log in with")
-        .defaultValue("12345")
         // Powie remember this will be publicly available on github. Don't put your actual password here
         .build()
     );
@@ -46,6 +45,7 @@ public class AutoLogin extends Module {
     @EventHandler
     private void onGameJoined(GameJoinedEvent event) {
         if (mc.hasSingleplayerServer()) return;
+        if (password.get().isEmpty()) return;
         ChatUtils.sendPlayerMsg(command.get() + " " + password.get());
         if (disableOnRun.get()) disable();
     }

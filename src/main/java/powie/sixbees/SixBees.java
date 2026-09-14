@@ -77,7 +77,7 @@ public class SixBees extends MeteorAddon {
 
     @PostInit
     public static void postInit() {
-        if (isDevEnvOrHasExtraArgs()) Modules.get().get(AutoLogin.class).enable();
+        if (FabricLoader.getInstance().isDevelopmentEnvironment()) Modules.get().get(AutoLogin.class).enable();
     }
 
     @Override
