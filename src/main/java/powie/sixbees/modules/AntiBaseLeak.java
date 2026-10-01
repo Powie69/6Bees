@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import powie.sixbees.SixBees;
@@ -90,11 +91,12 @@ public class AntiBaseLeak extends Module {
         event.cancel();
 
         MutableComponent warningMessage = Component.literal("Prevented TPA accept from: " + playerName);
-        warningMessage.append(createActionButton(" [ACCEPT ANYWAY] ", () -> {
-            acceptAnyway = "/tpy " + playerName;
-            ChatUtils.sendPlayerMsg("/tpy " + playerName);
+        String messageToSend = "/tpy " + playerName;
+        warningMessage.append(createActionButton(" [ACCEPT ANYWAY] ", messageToSend, () -> {
+            acceptAnyway = messageToSend;
+            ChatUtils.sendPlayerMsg(messageToSend);
         }));
-        ChatUtils.sendMsg(title, warningMessage);
+        info(warningMessage);
     }
 
     private void handlePreventHotspot(PacketEvent.Send event, String command, String secondArgument) {
@@ -110,19 +112,21 @@ public class AntiBaseLeak extends Module {
 
         event.cancel();
 
+        String messageToSend = "/hotspot " + secondArgument;
         MutableComponent warningMessage = Component.literal("Prevented hotspot creation");
-        warningMessage.append(createActionButton(" [CREATE ANYWAY]", () -> {
+        warningMessage.append(createActionButton(" [CREATE ANYWAY]", messageToSend, () -> {
             createAnyway = true;
-            ChatUtils.sendPlayerMsg("/hotspot " + secondArgument);
+            ChatUtils.sendPlayerMsg(messageToSend);
         }));
-        ChatUtils.sendMsg(title, warningMessage);
+        info(warningMessage);
     }
 
-    private MutableComponent createActionButton(String text, Runnable onClick) {
+    private MutableComponent createActionButton(String text, String actionTooltip, Runnable onClick) {
         return Component.literal(text)
             .withStyle(style -> style
                 .applyFormat(ChatFormatting.YELLOW)
                 .withClickEvent(new RunnableClickEvent(onClick))
+                .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to send: " + actionTooltip)))
             );
     }
 }
