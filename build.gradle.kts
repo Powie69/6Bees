@@ -78,9 +78,10 @@ tasks {
 
     jar {
         inputs.property("archivesName", archivesBaseName)
+        val licenseName = "LICENSE_$archivesBaseName"
 
         from("LICENSE") {
-            rename { "${it}_$archivesBaseName" }
+            rename("LICENSE", licenseName)
         }
     }
 
