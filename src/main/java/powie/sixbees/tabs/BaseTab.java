@@ -113,7 +113,7 @@ public class BaseTab extends Tab {
                 settings.radius.set(this.base.radius);
                 settings.dimension.set(this.base.dimension);
             } else if (mc.player != null) {
-                settings.coords.set(new BlockPos(mc.player.blockPosition()));
+                settings.coords.set(BlockPos.containing(mc.player.position()));
                 settings.dimension.set(PlayerUtils.getDimension());
             }
 

@@ -1,5 +1,6 @@
 package powie.sixbees.modules;
 
+import com.mojang.blaze3d.Blaze3D;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
@@ -8,9 +9,9 @@ import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import net.minecraft.util.Util;
 import powie.sixbees.SixBees;
 
+import java.net.URI;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -48,13 +49,13 @@ public class NsfwBlock extends Module {
 
         l.add(theme.label("To block your own maps, check out powhax"));
         WButton powhaxButton = l.add(theme.button("View powhax on GitHub")).widget();
-        powhaxButton.action = () -> Util.getPlatform().openUri("https://github.com/Powie69/powhax");
+        powhaxButton.action = () -> Blaze3D.openUri(URI.create("https://github.com/Powie69/powhax"));
 
         l.add(theme.horizontalSeparator()).expandX();
 
         l.add(theme.label("If a nsfw map ins't blocked,\nplease consider contributing to the data set <3"));
         WButton sixBeesDataButton = l.add(theme.button("View 6bees-data on GitHub")).widget();
-        sixBeesDataButton.action = () -> Util.getPlatform().openUri("https://github.com/Powie69/6bees-data");
+        sixBeesDataButton.action = () -> Blaze3D.openUri(URI.create("https://github.com/Powie69/6bees-data"));
         return l;
     }
 
