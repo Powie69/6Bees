@@ -147,7 +147,7 @@ public class BaseTab extends Tab {
         }
     }
 
-    public static class AddBaseSettings {
+    private static class AddBaseSettings {
         public final Settings settings = new Settings();
         private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
