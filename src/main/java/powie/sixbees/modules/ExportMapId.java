@@ -23,7 +23,7 @@ public class ExportMapId extends Module {
     private final Setting<File> file = sgGeneral.add(new FileSetting.Builder()
         .name("file")
         .description("The file to write the map id to.")
-        .filter("*.txt")
+        .filter("txt")
         .build()
     );
 

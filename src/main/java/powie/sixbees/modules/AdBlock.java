@@ -26,7 +26,7 @@ public class AdBlock extends Module {
         .build()
     );
 
-    private final BoolSetting discordlinks = sgGeneral.add(new BoolSetting.Builder()
+    private final BoolSetting discordLinks = sgGeneral.add(new BoolSetting.Builder()
         .name("discord-links")
         .description("Blocks discord links sent by players")
         .defaultValue(true)
@@ -54,7 +54,6 @@ public class AdBlock extends Module {
     @Override
     public void onActivate() {
         if (!is6B6T()) error("This module is only compatible with 6b6t");
-        
         if (isAllSettingsOff()) toggle();
     }
 
@@ -70,7 +69,7 @@ public class AdBlock extends Module {
             }
         }
 
-        if (discordlinks.get() && discordLinkPattern.matcher(message).find()) event.cancel();
+        if (discordLinks.get() && discordLinkPattern.matcher(message).find()) event.cancel();
     }
 
     @EventHandler
@@ -86,7 +85,7 @@ public class AdBlock extends Module {
     }
 
     private boolean isAllSettingsOff() {
-        if (!filterChat.get() && !discordlinks.get() && !filterWithers.get()) {
+        if (!filterChat.get() && !discordLinks.get() && !filterWithers.get()) {
             error("No settings are enabled!");
             return true;
         }
