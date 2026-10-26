@@ -62,6 +62,7 @@ public class AntiBaseLeak extends Module {
         return button;
     }
 
+    // TODO: maybe try this with SendMessageEvent
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof ServerboundChatCommandPacket(String command1))) return;

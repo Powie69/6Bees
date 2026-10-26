@@ -15,6 +15,7 @@ import static powie.sixbees.hud.SixBeesStarscript.setTpFields;
 public class ChatListener {
     private static final Pattern YOU_TO_OTHER_PATTERN = Pattern.compile("^Teleporting in (\\d+) seconds\\.\\.\\. \\[Cancel]$");
     private static final Pattern REQUEST_ACCEPT_PATTERN = Pattern.compile("^Your request sent to (.+?) was accepted!$");
+    private static final Pattern TPA_CANCEL_PATTERN = Pattern.compile("^You cancelled the teleport to (.+)!$");
     private static final Pattern HOME_TELEPORT_PATTERN = Pattern.compile("^Teleporting to (.+?) in (\\d+) seconds\\. \\[Cancel]$");
     private static final Pattern OTHER_TO_YOU_PATTERN = Pattern.compile("^Request from (.+?) accepted! \\[Cancel]$");
     private static final Pattern HOTSPOT_TELEPORT_PATTERN = Pattern.compile("^Teleporting you to hotspot of (.+?) in (\\d+) seconds\\. \\[Cancel]$");
@@ -49,11 +50,15 @@ public class ChatListener {
 
         handleYouToOther(message);
         handleRequestAccept(message);
+        handleTpaCancel(message);
         handleOtherToYou(message);
         handleHomeTeleport(message);
         handleHotspotTeleport(message);
         // tpa and home failure doesn't have the same message
-        if (message.equals("Teleport failed!") || message.equals("Teleport failed.")) {
+        // weird cases
+        if (message.equals("Teleport failed!")
+            || message.equals("Teleport failed.")
+            || message.startsWith("Teleport failed: ")) {
             setTpFields(0, "");
         }
     }
@@ -81,6 +86,13 @@ public class ChatListener {
         // its always 15 right??
         String destination = matcher.group(1);
         setTpFields(15, destination);
+    }
+
+    private static void handleTpaCancel(String message) {
+        Matcher matcher = TPA_CANCEL_PATTERN.matcher(message);
+        if (!matcher.matches()) return;
+
+        setTpFields(0, "");
     }
 
     private static void handleHomeTeleport(String message) {

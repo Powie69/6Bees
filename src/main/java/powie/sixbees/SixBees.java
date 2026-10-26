@@ -59,6 +59,7 @@ public class SixBees extends MeteorAddon {
         Modules.get().add(new NoBlockEntities());
         Modules.get().add(new NsfwBlock());
         Modules.get().add(new ShowMapId());
+        Modules.get().add(new TpTweaks());
 
         // Commands
         Commands.add(new GetMapId());
