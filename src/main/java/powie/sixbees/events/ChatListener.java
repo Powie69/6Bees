@@ -54,11 +54,11 @@ public class ChatListener {
         handleOtherToYou(message);
         handleHomeTeleport(message);
         handleHotspotTeleport(message);
-        // tpa and home failure doesn't have the same message
-        // weird cases
-        if (message.equals("Teleport failed!")
-            || message.equals("Teleport failed.")
-            || message.startsWith("Teleport failed: ")) {
+        // fuck these inconsistencies
+        if (message.startsWith("Teleport failed")
+            || message.equalsIgnoreCase("Your pending teleport has been cancelled.")
+            || message.startsWith("Successfully cancelled your pending teleport request to:")
+        ) {
             setTpFields(0, "");
         }
     }
