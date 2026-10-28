@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import powie.sixbees.SixBees;
@@ -69,22 +70,30 @@ public class TpTweaks extends Module {
     // Your pending teleport has been cancelled.
 
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     private void onMessageReceive(ReceiveMessageEvent event) {
         String message = event.getMessage().getString();
 
-        if (handleBlockNextCancelMessage(message)) event.cancel();
+        if (handleBlockNextCancelMessage(message)) {
+            event.cancel();
+            return;
+        }
         handleAutoDeny(message);
     }
 
+//    @EventHandler
+//    private void onCommandSend(SendCommandEvent event) {
+//        handleRequestSent(event.command);
+//    }
+
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (!(event.packet instanceof ServerboundChatCommandPacket(String command))) return;
-        handleRequestSent(command);
+        if (!(event.packet instanceof ServerboundChatCommandPacket(String message))) return;
+        handleRequestSent(message);
     }
 
-    private void handleRequestSent(String message) {
-        if (!autoCancelPreviousTpa.get() || !message.startsWith("tpa")) return;
+    private void handleRequestSent(String command) {
+        if (!autoCancelPreviousTpa.get() || !command.startsWith("tpa")) return;
 
         ChatUtils.sendPlayerMsg("/tpcancel", false);
         blockNextCancelMessage = true;
@@ -93,7 +102,9 @@ public class TpTweaks extends Module {
     private boolean handleBlockNextCancelMessage(String message) {
         if (!blockNextCancelMessage) return false;
         Matcher matcher = TPA_CANCEL_PATTERN.matcher(message);
-        if (!matcher.matches() && !message.equalsIgnoreCase(NO_TP_TO_CANCEL_PATTERN)) return false;
+        // uses .startsWith because of meteor's better chat - antispam
+        if (!matcher.matches() && !message.toLowerCase().startsWith(NO_TP_TO_CANCEL_PATTERN.toLowerCase()))
+            return false;
         blockNextCancelMessage = false;
         return true;
     }

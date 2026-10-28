@@ -7,6 +7,8 @@ import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.orbit.EventHandler;
 import powie.sixbees.utils.Checks;
 
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,14 +22,24 @@ public class ChatListener {
     private static final Pattern OTHER_TO_YOU_PATTERN = Pattern.compile("^Request from (.+?) accepted! \\[Cancel]$");
     private static final Pattern HOTSPOT_TELEPORT_PATTERN = Pattern.compile("^Teleporting you to hotspot of (.+?) in (\\d+) seconds\\. \\[Cancel]$");
 
+    private static final List<TeleportHandler> HANDLERS = List.of(
+        new TeleportHandler(YOU_TO_OTHER_PATTERN, m -> setTpFields(Integer.parseInt(m.group(1)), null)),
+        new TeleportHandler(REQUEST_ACCEPT_PATTERN, m -> setTpFields(-1, m.group(1))),
+        new TeleportHandler(OTHER_TO_YOU_PATTERN, m -> setTpFields(15, m.group(1))), // its always 15 right??
+        new TeleportHandler(HOME_TELEPORT_PATTERN, m -> setTpFields(Integer.parseInt(m.group(2)), m.group(1))),
+        new TeleportHandler(HOTSPOT_TELEPORT_PATTERN, m -> setTpFields(Integer.parseInt(m.group(2)), m.group(1))),
+
+        // cancels / failures (fuck these inconsistencies)
+        clearOn(TPA_CANCEL_PATTERN),
+        clearOn("^Teleport failed.*$"),
+        clearOn("(?i)^Your pending teleport has been cancelled\\.$"),
+        clearOn("^Successfully cancelled your pending teleport request to:.*$"),
+        clearOn("^You have no pending teleport requests to cancel!$"),
+        clearOn("^Your pending teleport has been cancelled\\.$")
+    );
+
     private boolean active = false;
 
-    /**
-     * <p>Hello reader. This is for listening to ReceiveMessageEvent without it being bound to a module or hud</p>
-     * <p>if this is the wrong way of doing it. then please TELL ME. PLEASEEEEEE</p>
-     *
-     * @author Powie69
-     */
     public ChatListener() {
         MeteorClient.EVENT_BUS.subscribe(this);
     }
@@ -48,68 +60,27 @@ public class ChatListener {
         if (!active) return;
         String message = event.getMessage().getString();
 
-        handleYouToOther(message);
-        handleRequestAccept(message);
-        handleTpaCancel(message);
-        handleOtherToYou(message);
-        handleHomeTeleport(message);
-        handleHotspotTeleport(message);
-        // fuck these inconsistencies
-        if (message.startsWith("Teleport failed")
-            || message.equalsIgnoreCase("Your pending teleport has been cancelled.")
-            || message.startsWith("Successfully cancelled your pending teleport request to:")
-        ) {
-            setTpFields(0, "");
+        for (TeleportHandler handler : HANDLERS) {
+            if (handler.tryHandle(message)) return;
         }
     }
 
-    // teleports
-    private static void handleYouToOther(String message) {
-        Matcher matcher = YOU_TO_OTHER_PATTERN.matcher(message);
-        if (!matcher.matches()) return;
 
-        int seconds = Integer.parseInt((matcher.group(1)));
-        setTpFields(seconds, null);
+    private record TeleportHandler(Pattern pattern, Consumer<Matcher> action) {
+        boolean tryHandle(String message) {
+            Matcher matcher = pattern.matcher(message);
+            if (!matcher.matches()) return false;
+
+            action.accept(matcher);
+            return true;
+        }
     }
 
-    private static void handleRequestAccept(String message) {
-        Matcher matcher = REQUEST_ACCEPT_PATTERN.matcher(message);
-        if (!matcher.matches()) return;
-
-        String destination = matcher.group(1);
-        setTpFields(-1, destination);
+    private static TeleportHandler clearOn(Pattern pattern) {
+        return new TeleportHandler(pattern, _ -> setTpFields(0, ""));
     }
 
-    private static void handleOtherToYou(String message) {
-        Matcher matcher = OTHER_TO_YOU_PATTERN.matcher(message);
-        if (!matcher.matches()) return;
-        // its always 15 right??
-        String destination = matcher.group(1);
-        setTpFields(15, destination);
-    }
-
-    private static void handleTpaCancel(String message) {
-        Matcher matcher = TPA_CANCEL_PATTERN.matcher(message);
-        if (!matcher.matches()) return;
-
-        setTpFields(0, "");
-    }
-
-    private static void handleHomeTeleport(String message) {
-        Matcher matcher = HOME_TELEPORT_PATTERN.matcher(message);
-        if (!matcher.matches()) return;
-
-        String destination = matcher.group(1);
-        int seconds = Integer.parseInt(matcher.group(2));
-        setTpFields(seconds, destination);
-    }
-
-    private static void handleHotspotTeleport(String message) {
-        Matcher matcher = HOTSPOT_TELEPORT_PATTERN.matcher(message);
-        if (!matcher.matches()) return;
-
-        String destination = matcher.group(1);
-        int seconds = Integer.parseInt(matcher.group(2));
-        setTpFields(seconds, destination);
+    private static TeleportHandler clearOn(String regex) {
+        return clearOn(Pattern.compile(regex));
     }
 }

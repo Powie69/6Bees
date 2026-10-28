@@ -1,6 +1,5 @@
 package powie.sixbees.modules;
 
-import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
@@ -18,8 +17,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import powie.sixbees.SixBees;
+import powie.sixbees.events.SendCommandEvent;
 import powie.sixbees.tabs.BaseTab;
 import powie.sixbees.utils.BaseUtils;
 
@@ -63,9 +62,8 @@ public class AntiBaseLeak extends Module {
     }
 
     @EventHandler
-    private void onSendPacket(PacketEvent.Send event) {
-        if (!(event.packet instanceof ServerboundChatCommandPacket(String command1))) return;
-        String command = command1.toLowerCase();
+    private void onCommandSend(SendCommandEvent event) {
+        String command = event.command.toLowerCase();
         String[] parts = command.split(" ", 3);
         String secondArgument = parts.length > 1 ? parts[1].toLowerCase() : "";
 
@@ -74,7 +72,7 @@ public class AntiBaseLeak extends Module {
         handlePreventHotspot(event, command, secondArgument);
     }
 
-    private void handlePreventTpa(PacketEvent.Send event, String command, String playerName) {
+    private void handlePreventTpa(SendCommandEvent event, String command, String playerName) {
         if (!preventTpa.get()) return;
         if (!command.startsWith("tpy")) return;
         if (playerName.isEmpty()) return;
@@ -99,7 +97,7 @@ public class AntiBaseLeak extends Module {
         info(warningMessage);
     }
 
-    private void handlePreventHotspot(PacketEvent.Send event, String command, String secondArgument) {
+    private void handlePreventHotspot(SendCommandEvent event, String command, String secondArgument) {
         if (!preventHotspot.get()) return;
         if (!command.startsWith("hotspot") || !(secondArgument.equals("create") || secondArgument.equals("protectedcreate")))
             return;
