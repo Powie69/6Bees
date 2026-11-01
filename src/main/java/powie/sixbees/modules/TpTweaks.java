@@ -1,6 +1,7 @@
 package powie.sixbees.modules;
 
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -11,8 +12,8 @@ import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import powie.sixbees.SixBees;
-import powie.sixbees.events.SendCommandEvent;
 import powie.sixbees.utils.BaseUtils;
 
 import java.util.regex.Matcher;
@@ -46,7 +47,7 @@ public class TpTweaks extends Module {
     private static final Pattern TPA_REQUEST_PATTERN = Pattern.compile("^(.+) wants to teleport to you\\.$");
 
     // there inst even a message that says your request expired
-    private int pendingCancelMessages;
+    private boolean blockNextCancelMessage;
 
     public TpTweaks() {
         super(SixBees.CATEGORY, "tp-tweaks", "TP related utilities");
@@ -54,7 +55,7 @@ public class TpTweaks extends Module {
 
     @Override
     public void onDeactivate() {
-        pendingCancelMessages = 0;
+        blockNextCancelMessage = false;
     }
 
     // tpa
@@ -84,23 +85,29 @@ public class TpTweaks extends Module {
         handleAutoDeny(message);
     }
 
+    /**
+     * SendCommandEvent not used for what I assume to be race condition issues.<br>
+     * If y'all know why SendCommandEvent doesn't work please let me know.
+     *
+     * @author Powie69
+     */
     @EventHandler
-    private void onCommandSend(SendCommandEvent event) {
-        handleRequestSent(event.command);
+    private void onSendPacket(PacketEvent.Send event) {
+        if (!(event.packet instanceof ServerboundChatCommandPacket(String command))) return;
+        handleRequestSent(command);
     }
 
     private void handleRequestSent(String command) {
         if (!autoCancelPreviousTpa.get() || !command.startsWith("tpa")) return;
         ChatUtils.sendPlayerMsg("/tpcancel", false);
-        pendingCancelMessages++;
+        blockNextCancelMessage = true;
     }
 
     private boolean blockCancelMessage(String message) {
         if (!autoCancelPreviousTpa.get()) return false;
         Matcher matcher = TPA_CANCEL_PATTERN.matcher(message);
-        // uses .startsWith because of meteor's better chat - antispam
-        if (!matcher.matches() && !message.toLowerCase().startsWith(NO_TP_TO_CANCEL_PATTERN.toLowerCase())) return false;
-        pendingCancelMessages--;
+        if (!matcher.matches() && !message.equalsIgnoreCase(NO_TP_TO_CANCEL_PATTERN)) return false;
+        blockNextCancelMessage = false;
         return true;
     }
 
@@ -135,6 +142,16 @@ public class TpTweaks extends Module {
         EVERYONE,
         NON_FRIENDS,
         FRIENDS,
-        NO_ONE
+        NO_ONE;
+
+        @Override
+        public String toString() {
+            return switch (this) {
+                case EVERYONE -> "Everyone";
+                case NON_FRIENDS -> "Non Friends";
+                case FRIENDS -> "Friends";
+                case NO_ONE -> "No one";
+            };
+        }
     }
 }
