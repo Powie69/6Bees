@@ -1,7 +1,6 @@
 package powie.sixbees.modules;
 
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
-import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -12,8 +11,8 @@ import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import powie.sixbees.SixBees;
+import powie.sixbees.events.SendCommandEvent;
 import powie.sixbees.utils.BaseUtils;
 
 import java.util.regex.Matcher;
@@ -46,13 +45,16 @@ public class TpTweaks extends Module {
     private static final String NO_TP_TO_CANCEL_PATTERN = "There is no teleport to cancel!";
     private static final Pattern TPA_REQUEST_PATTERN = Pattern.compile("^(.+) wants to teleport to you\\.$");
 
-
-    private boolean blockNextCancelMessage;
-
     // there inst even a message that says your request expired
+    private int pendingCancelMessages;
 
     public TpTweaks() {
         super(SixBees.CATEGORY, "tp-tweaks", "TP related utilities");
+    }
+
+    @Override
+    public void onDeactivate() {
+        pendingCancelMessages = 0;
     }
 
     // tpa
@@ -62,6 +64,7 @@ public class TpTweaks extends Module {
     // You cancelled the teleport to KrynSpawn!
     // Please wait for your existing request to be accepted or denied.
     // There is no teleport to cancel!
+    // Powie69, please login with the command: /login <password>
 
     // homes
     // You have no pending teleport requests to cancel!
@@ -74,38 +77,30 @@ public class TpTweaks extends Module {
     private void onMessageReceive(ReceiveMessageEvent event) {
         String message = event.getMessage().getString();
 
-        if (handleBlockNextCancelMessage(message)) {
+        if (blockCancelMessage(message)) {
             event.cancel();
             return;
         }
         handleAutoDeny(message);
     }
 
-//    @EventHandler
-//    private void onCommandSend(SendCommandEvent event) {
-//        handleRequestSent(event.command);
-//    }
-
     @EventHandler
-    private void onSendPacket(PacketEvent.Send event) {
-        if (!(event.packet instanceof ServerboundChatCommandPacket(String message))) return;
-        handleRequestSent(message);
+    private void onCommandSend(SendCommandEvent event) {
+        handleRequestSent(event.command);
     }
 
     private void handleRequestSent(String command) {
         if (!autoCancelPreviousTpa.get() || !command.startsWith("tpa")) return;
-
         ChatUtils.sendPlayerMsg("/tpcancel", false);
-        blockNextCancelMessage = true;
+        pendingCancelMessages++;
     }
 
-    private boolean handleBlockNextCancelMessage(String message) {
-        if (!blockNextCancelMessage) return false;
+    private boolean blockCancelMessage(String message) {
+        if (!autoCancelPreviousTpa.get()) return false;
         Matcher matcher = TPA_CANCEL_PATTERN.matcher(message);
         // uses .startsWith because of meteor's better chat - antispam
-        if (!matcher.matches() && !message.toLowerCase().startsWith(NO_TP_TO_CANCEL_PATTERN.toLowerCase()))
-            return false;
-        blockNextCancelMessage = false;
+        if (!matcher.matches() && !message.toLowerCase().startsWith(NO_TP_TO_CANCEL_PATTERN.toLowerCase())) return false;
+        pendingCancelMessages--;
         return true;
     }
 

@@ -65,7 +65,6 @@ public class ChatListener {
         }
     }
 
-
     private record TeleportHandler(Pattern pattern, Consumer<Matcher> action) {
         boolean tryHandle(String message) {
             Matcher matcher = pattern.matcher(message);
