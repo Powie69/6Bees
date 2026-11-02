@@ -1,9 +1,8 @@
 package powie.sixbees.modules;
 
 import meteordevelopment.meteorclient.events.entity.player.PlaceBlockEvent;
-import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
-import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -12,6 +11,7 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EnderChestBlock;
@@ -26,34 +26,33 @@ public class DoubleEchest extends Module {
 
     private final Setting<PreferredSide> preferredSide = sgGeneral.add(new EnumSetting.Builder<PreferredSide>()
         .name("preferred-side")
-        .description("Will prioritize placing the Ender chest on this side.")
+        .description("Prioritizes placing the Ender chest on this side relative to your facing direction.")
         .defaultValue(PreferredSide.LEFT)
         .build()
     );
 
-    private final Setting<Integer> placeDelay = sgGeneral.add(new IntSetting.Builder()
-        .name("place-delay")
-        .description("The delay in ticks between placing blocks.")
-        .defaultValue(1)
-        .min(0)
-        .sliderMax(20)
+    private final Setting<Boolean> preventDuplicates = sgGeneral.add(new BoolSetting.Builder()
+        .name("prevent-duplicates")
+        .description("Do nothing if echest is already connected")
+        .defaultValue(true)
         .build()
     );
 
     private final Set<BlockPos> autoPlacedPositions = new HashSet<>();
-    private int placeCooldown;
 
     /**
      * Known issue: It does weird things if it touches grass 💀
      */
     public DoubleEchest() {
-        super(SixBees.CATEGORY, "double-echest", "Automatically creates a double Ender chest when you place one.");
+        super(SixBees.CATEGORY,
+            "double-echest",
+            "Automatically creates a double Ender chest when you place one.",
+            "double ender chest");
     }
 
     @Override
     public void onDeactivate() {
         autoPlacedPositions.clear();
-        placeCooldown = 0;
     }
 
     @EventHandler
@@ -66,7 +65,20 @@ public class DoubleEchest extends Module {
             autoPlacedPositions.remove(blockPos);
             return;
         }
-        if (placeCooldown > 0) return;
+
+        if (preventDuplicates.get()) {
+            for (PreferredSide side : PreferredSide.values()) {
+                BlockPos checkPos = switch (side) {
+                    case LEFT -> blockPos.west();
+                    case RIGHT -> blockPos.east();
+                    case FRONT -> blockPos.south();
+                    case BACK -> blockPos.north();
+                };
+                if (mc.level.getBlockState(checkPos).getBlock() instanceof EnderChestBlock) return;
+            }
+        }
+
+        Direction echestFacing = mc.player.getDirection();
 
         PreferredSide[] sides = PreferredSide.values();
         int startIndex = preferredSide.get().ordinal();
@@ -74,20 +86,18 @@ public class DoubleEchest extends Module {
         for (int i = 0; i < sides.length; i++) {
             PreferredSide side = sides[(startIndex + i) % sides.length];
 
-            BlockPos targetPos = switch (side) {
-                case LEFT -> event.blockPos.west();
-                case RIGHT -> event.blockPos.east();
-                case FRONT -> event.blockPos.south();
-                case BACK -> event.blockPos.north();
+            Direction targetDirection = switch (side) {
+                case LEFT -> echestFacing.getCounterClockWise();
+                case RIGHT -> echestFacing.getClockWise();
+                case FRONT -> echestFacing;
+                case BACK -> echestFacing.getOpposite();
             };
+            BlockPos targetPos = blockPos.relative(targetDirection);
 
             if (!PlayerUtils.isWithinReach(targetPos)) continue;
 
             if (!mc.level.getBlockState(targetPos).canBeReplaced()) continue;
             if (!mc.level.isUnobstructed(echest.defaultBlockState(), targetPos, CollisionContext.empty())) continue;
-
-//            BlockState state = mc.level.getBlockState(targetPos);
-//            if (state. isAir() || isClickable(state.getBlock())) continue;
 
             autoPlacedPositions.add(targetPos);
             boolean placed = BlockUtils.place(
@@ -96,19 +106,8 @@ public class DoubleEchest extends Module {
                 0
             );
 
-            if (placed) {
-                placeCooldown = placeDelay.get();
-            } else {
-                autoPlacedPositions.remove(targetPos);
-            }
+            if (!placed) autoPlacedPositions.remove(targetPos);
             return;
-        }
-    }
-
-    @EventHandler
-    private void onTick(TickEvent.Post event) {
-        if (placeCooldown > 0) {
-            placeCooldown--;
         }
     }
 
@@ -118,5 +117,4 @@ public class DoubleEchest extends Module {
         FRONT,
         BACK,
     }
-
 }
