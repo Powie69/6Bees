@@ -41,7 +41,9 @@ public class DoubleEchest extends Module {
     private final Set<BlockPos> autoPlacedPositions = new HashSet<>();
 
     /**
-     * Known issue: It does weird things if it touches grass 💀
+     * <P>Known issue: It does weird things if it touches grass 💀</p>
+     *
+     * TODO: Maybe implement own placing logic as Block.place() doesn't seem to work well with these "partial" blocks
      */
     public DoubleEchest() {
         super(SixBees.CATEGORY,
