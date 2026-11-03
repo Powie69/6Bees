@@ -39,8 +39,6 @@ public class TpTweaks extends Module {
     );
 
     // stupid 2 space inconsistency
-    // private static final Pattern REQUEST_SENT_PATTERN = Pattern.compile("^Request sent to: {2}(.+)$");
-    // private static final String WAIT_PATTERN = "Please wait for your existing request to be accepted or denied.";
     // TPA_CANCEL_PATTERN has Duplicate in ChatListener
     private static final Pattern TPA_CANCEL_PATTERN = Pattern.compile("^You cancelled the teleport to (.+)!$");
     private static final String NO_TP_TO_CANCEL_PATTERN = "There is no teleport to cancel!";
@@ -58,22 +56,6 @@ public class TpTweaks extends Module {
         blockNextCancelMessage = false;
     }
 
-    // tpa
-    // Request sent to:  KrynSpawn
-    // Your request sent to KrynSpawn was accepted!
-    // un88 wants to teleport to you.
-    // You cancelled the teleport to KrynSpawn!
-    // Please wait for your existing request to be accepted or denied.
-    // There is no teleport to cancel!
-    // Powie69, please login with the command: /login <password>
-
-    // homes
-    // You have no pending teleport requests to cancel!
-
-    // hotspot
-    // Your pending teleport has been cancelled.
-
-
     @EventHandler(priority = EventPriority.HIGH)
     private void onMessageReceive(ReceiveMessageEvent event) {
         String message = event.getMessage().getString();
@@ -86,7 +68,7 @@ public class TpTweaks extends Module {
     }
 
     /**
-     * SendCommandEvent not used for what I assume to be race condition issues.<br>
+     * SendCommandEvent not used here for what I assume to be race condition issues.<br>
      * If y'all know why SendCommandEvent doesn't work please let me know.
      *
      * @author Powie69

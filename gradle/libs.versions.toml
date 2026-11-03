@@ -12,6 +12,9 @@ loom = "1.18-SNAPSHOT"
 # Meteor (https://github.com/MeteorDevelopment/meteor-client/)
 meteor = "26.3-SNAPSHOT"
 
+# Gson
+gson = "2.10.1"
+
 # Mods
 
 [libraries]
@@ -21,6 +24,9 @@ fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-l
 
 # Meteor client
 meteor-client = { module = "meteordevelopment:meteor-client", version.ref = "meteor" }
+
+# Gson
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
 # Mods
 
