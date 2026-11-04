@@ -1,6 +1,9 @@
 package powie.sixbees.utils;
 
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -23,31 +26,48 @@ import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static powie.sixbees.utils.StringUtils.toPossessive;
+
 // This is so brainrot
 public class PlayerStats {
-    private static final String BASE_URL = "https://www.6b6t.org/en/stats/";
+    private static final String BASE_URL = "https://www.6b6t.org/stats/";
     private static final DateTimeFormatter MEMBER_SINCE_FORMAT =
         DateTimeFormatter.ofPattern("M/d/uuuu", Locale.US);
     private static final Pattern DATE_PATTERN = Pattern.compile("\\d{1,2}/\\d{1,2}/\\d{4}");
     private static final Pattern DURATION_PART = Pattern.compile("(\\d+)\\s*([dhms])");
+    private static final DateTimeFormatter OUTPUT_DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private static final ExecutorService EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
+
+    public static void sendStatsAsMessage(@NotNull String username) {
+        String chatPrefix = "Player Stats";
+        ChatUtils.infoPrefix(chatPrefix, "Loading stats for " + username + "...");
+        getStatsAsync(username).thenAccept(Stats -> {
+            MutableComponent msg = Component.empty();
+            msg.append(Component.literal("\n==============================\n").withStyle(ChatFormatting.YELLOW));
+            msg.append(Component.literal(toPossessive(Stats.name()) + " Stats:\n").withStyle(ChatFormatting.YELLOW));
+            msg.append(addLine("Playtime: ", Stats.allTime.prettyPlaytime()));
+            msg.append(addLine("Join Date: ", Stats.prettyMemberSince()));
+            msg.append(addLine("Kills: ", String.valueOf(Stats.allTime.kills())));
+            msg.append(addLine("Deaths: ", String.valueOf(Stats.allTime.deaths())));
+            msg.append(addLine("K/D ratio: ", String.valueOf(Stats.allTime.killDeathRatio())));
+            msg.append(Component.literal("==============================").withStyle(ChatFormatting.YELLOW));
+            ChatUtils.sendMsg(msg);
+        }).exceptionally(e -> {
+            ChatUtils.errorPrefix(chatPrefix, "Failed to load stats for " + username + ": " + e.getMessage());
+            return null;
+        });
+    }
+
+    private static Component addLine(String label, String value) {
+        return Component.empty()
+            .append(Component.literal(label).withStyle(ChatFormatting.GRAY))
+            .append(Component.literal(value + "\n").withStyle(ChatFormatting.WHITE));
+    }
 
     public static CompletableFuture<Stats> getStatsAsync(@NotNull String username) {
         return CompletableFuture.supplyAsync(() -> getStats(username), EXECUTOR);
     }
 
-    public static void sendStatsAsMessage(@NotNull String username) {
-        String MessagePrefix = "Player Stats";
-        getStatsAsync(username).thenAccept(Stats -> {
-
-        }).exceptionally(e -> {
-            ChatUtils.error(MessagePrefix, "Failed to load stats for " + username + ": " + e.getMessage());
-            return null;
-        });
-
-    }
-
-    // TODO: try my best to make response size smaller
     private static Document getStatsPage(@NotNull String username) {
         try {
             Connection.Response response = Jsoup.connect(BASE_URL + username)
@@ -80,8 +100,6 @@ public class PlayerStats {
         Element heading = doc.selectFirst("h1");
         String name = heading != null ? heading.text().trim() : username; // because casing
 
-        LocalDate memberSince = parseMemberSince(doc);
-
         // label -> [7 days, 30 days, all time]
         Map<String, List<String>> rows = new HashMap<>();
         for (Element row : doc.select("table tr")) {
@@ -96,7 +114,7 @@ public class PlayerStats {
 
         return new Stats(
             name,
-            memberSince,
+            parseMemberSince(doc),
             buildPeriod(rows, 0),
             buildPeriod(rows, 1),
             buildPeriod(rows, 2)
@@ -121,19 +139,19 @@ public class PlayerStats {
             duration(rows, col),
             number(rows, "blocks walked", col),
             number(rows, "blocks flown", col),
-            (long) number(rows, "kills", col),
-            (long) number(rows, "deaths", col),
-            (long) number(rows, "jumps", col),
-            (long) number(rows, "mob kills", col),
-            (long) number(rows, "netherrack mined", col),
-            (long) number(rows, "tnt placed", col),
-            (long) number(rows, "end crystals placed", col),
-            (long) number(rows, "totems used", col),
-            (long) number(rows, "cake slices eaten", col),
-            (long) number(rows, "golden hoes crafted", col),
-            (long) number(rows, "enchanted golden apples eaten", col),
-            (long) number(rows, "cigars smoked", col),
-            (long) number(rows, "carpets placed", col)
+            number(rows, "kills", col),
+            number(rows, "deaths", col),
+            number(rows, "jumps", col),
+            number(rows, "mob kills", col),
+            number(rows, "netherrack mined", col),
+            number(rows, "tnt placed", col),
+            number(rows, "end crystals placed", col),
+            number(rows, "totems used", col),
+            number(rows, "cake slices eaten", col),
+            number(rows, "golden hoes crafted", col),
+            number(rows, "enchanted golden apples eaten", col),
+            number(rows, "cigars smoked", col),
+            number(rows, "carpets placed", col)
         );
     }
 
@@ -143,13 +161,13 @@ public class PlayerStats {
     }
 
     /**
-     * "2,966km" -> 2966.0, "1,524" -> 1524.0; missing/unparseable -> 0.
+     * "2,966km" -> 2966, "1,524" -> 1524; missing/unparseable -> 0.
      */
-    private static double number(Map<String, List<String>> rows, String label, int col) {
+    private static int number(Map<String, List<String>> rows, String label, int col) {
         String cleaned = cell(rows, label, col).replaceAll("[^0-9.]", "");
         if (cleaned.isEmpty()) return 0;
         try {
-            return Double.parseDouble(cleaned);
+            return Integer.parseInt(cleaned);
         } catch (NumberFormatException e) {
             return 0;
         }
@@ -197,28 +215,28 @@ public class PlayerStats {
 
             long daysBetween = ChronoUnit.DAYS.between(memberSince, LocalDate.now());
 
-            if (daysBetween == 0) return memberSince + " (today)";
-            if (daysBetween == 1) return memberSince + " (1 day ago)";
-            return memberSince + " (" + daysBetween + " days ago)";
+            if (daysBetween == 0) return memberSince.format(OUTPUT_DATE_FORMAT) + " (today)";
+            if (daysBetween == 1) return memberSince.format(OUTPUT_DATE_FORMAT) + " (1 day ago)";
+            return memberSince.format(OUTPUT_DATE_FORMAT) + " (" + daysBetween + " days ago)";
         }
 
         public record Period(
             Duration playtime,
-            double blocksWalkedKm,
-            double blocksFlownKm,
-            long kills,
-            long deaths,
-            long jumps,
-            long mobKills,
-            long netherrackMined,
-            long tntPlaced,
-            long endCrystalsPlaced,
-            long totemsUsed,
-            long cakeSlicesEaten,
-            long goldenHoesCrafted,
-            long enchantedGoldenApplesEaten,
-            long cigarsSmoked,
-            long carpetsPlaced
+            int blocksWalkedKm,
+            int blocksFlownKm,
+            int kills,
+            int deaths,
+            int jumps,
+            int mobKills,
+            int netherrackMined,
+            int tntPlaced,
+            int endCrystalsPlaced,
+            int totemsUsed,
+            int cakeSlicesEaten,
+            int goldenHoesCrafted,
+            int enchantedGoldenApplesEaten,
+            int cigarsSmoked,
+            int carpetsPlaced
         ) {
             public double killDeathRatio() {
                 return deaths == 0 ? kills : Math.round((double) kills / deaths * 100.0) / 100.0;
@@ -231,7 +249,7 @@ public class PlayerStats {
 
                 StringBuilder sb = new StringBuilder();
                 if (days > 0) sb.append(days).append("d ");
-                if (hours > 0 || days > 0) sb.append(hours).append("h ");
+                if (hours > 0) sb.append(hours).append("h ");
                 if (minutes > 0 || (days == 0 && hours == 0)) sb.append(minutes).append("m");
 
                 return sb.toString().trim();

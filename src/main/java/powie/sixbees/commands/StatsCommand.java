@@ -9,6 +9,8 @@ import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.commands.SharedSuggestionProvider;
 import powie.sixbees.screens.PlayerStatsScreen;
 
+import static powie.sixbees.utils.PlayerStats.sendStatsAsMessage;
+
 public class StatsCommand extends Command {
     public StatsCommand() {
         super("stats", "Shows statistics of a specified player");
@@ -21,12 +23,24 @@ public class StatsCommand extends Command {
                 mc.getConnection().getOnlinePlayers().stream().map(info -> info.getProfile().name()),
                 suggestions
             ))
+            // .stats <player>
             .executes(context -> {
-                WidgetScreen playerStatsScreen = new PlayerStatsScreen(StringArgumentType.getString(context, "player"));
-                playerStatsScreen.parent = null; // Prevents chat command from staying when pressing ESC
-                Utils.screenToOpen = playerStatsScreen;
+                String player = StringArgumentType.getString(context, "player");
+                sendStatsAsMessage(player);
                 return SINGLE_SUCCESS;
             })
+            // .stats <player> all
+            .then(literal("all").executes(context -> {
+                String player = StringArgumentType.getString(context, "player");
+                openStatsScreen(player);
+                return SINGLE_SUCCESS;
+            }))
         );
+    }
+
+    private void openStatsScreen(String player) {
+        WidgetScreen playerStatsScreen = new PlayerStatsScreen(player);
+        playerStatsScreen.parent = null; // Prevents chat command from staying when pressing ESC
+        Utils.screenToOpen = playerStatsScreen;
     }
 }

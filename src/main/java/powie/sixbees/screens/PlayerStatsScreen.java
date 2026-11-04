@@ -4,6 +4,7 @@ import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WSection;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import powie.sixbees.utils.PlayerStats;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -26,10 +27,12 @@ public class PlayerStatsScreen extends WindowScreen {
 
         WSection overview = add(theme.section("Overview")).expandX().widget();
         WTable overviewTable = overview.add(theme.table()).widget();
+        overviewTable.horizontalSpacing = 30;
         WSection more = add(theme.section("More")).expandX().widget(); // naming could be better. Please give suggestions
         WTable moreTable = more.add(theme.table()).widget();
+        moreTable.horizontalSpacing = 30;
 
-        PlayerStats.getStatsAsync(username).thenAccept(Stats -> {
+        PlayerStats.getStatsAsync(username).thenAccept(Stats -> { // TODO: Test if mc.execute matters
             mc.execute(() -> {
                 infoTable.clear();
                 fillOverviewTable(overviewTable, Stats);
@@ -37,9 +40,11 @@ public class PlayerStatsScreen extends WindowScreen {
             });
         }).exceptionally(e -> {
             mc.execute(() -> fillInfoTable(infoTable, e.getCause().getMessage()));
-//            mc.execute(() -> fillTable(infoTable, null, true, e.getMessage()));
             return null;
         });
+
+        add(theme.horizontalSeparator()).expandX();
+        add(theme.label("6Bees Addon").color(new Color(255, 206, 43))).padLeft(6);
     }
 
     private void fillInfoTable(WTable table, String errorText) {
@@ -53,7 +58,7 @@ public class PlayerStatsScreen extends WindowScreen {
         table.clear();
         table.add(theme.label("Playtime: " + stats.allTime().prettyPlaytime()));
         table.row();
-        table.add(theme.label("Member since: " + stats.prettyMemberSince()));
+        table.add(theme.label("Join Date: " + stats.prettyMemberSince()));
         table.row();
         table.add(theme.label("Kills: " + stats.allTime().kills()));
         table.row();
@@ -66,9 +71,9 @@ public class PlayerStatsScreen extends WindowScreen {
     private void fillMoreTable(WTable table, PlayerStats.Stats stats) {
         table.clear();
         table.add(theme.label(""));
-        table.add(theme.label("7 Days")).right().padLeft(8);
-        table.add(theme.label("30 Days")).right().padLeft(8);
-        table.add(theme.label("All time")).right().padLeft(8);
+        table.add(theme.label("7 Days")).right();
+        table.add(theme.label("30 Days")).right();
+        table.add(theme.label("All time")).right();
         table.row();
 
         // im so sorry for this slop
@@ -92,9 +97,9 @@ public class PlayerStatsScreen extends WindowScreen {
 
     private void addStatRow(WTable table, String label, Object value7d, Object value30d, Object valueAll) {
         table.add(theme.label(label));
-        table.add(theme.label(String.valueOf(value7d))).right().padLeft(8);
-        table.add(theme.label(String.valueOf(value30d))).right().padLeft(8);
-        table.add(theme.label(String.valueOf(valueAll))).right().padLeft(8);
+        table.add(theme.label(String.valueOf(value7d))).right();
+        table.add(theme.label(String.valueOf(value30d))).right();
+        table.add(theme.label(String.valueOf(valueAll))).right();
         table.row();
     }
 
