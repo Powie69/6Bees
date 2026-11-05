@@ -1,5 +1,8 @@
 package powie.sixbees.utils;
 
+import meteordevelopment.meteorclient.gui.WidgetScreen;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -9,6 +12,8 @@ import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import powie.sixbees.modules.StatsModule;
+import powie.sixbees.screens.PlayerStatsScreen;
 
 import java.io.IOException;
 import java.time.DateTimeException;
@@ -21,21 +26,26 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static powie.sixbees.utils.StringUtils.formatNumber;
 import static powie.sixbees.utils.StringUtils.toPossessive;
 
 // This is so brainrot
+// TODO: unslop
 public class PlayerStats {
     private static final String BASE_URL = "https://www.6b6t.org/stats/";
-    private static final DateTimeFormatter MEMBER_SINCE_FORMAT =
-        DateTimeFormatter.ofPattern("M/d/uuuu", Locale.US);
+
+    private static final DateTimeFormatter MEMBER_SINCE_FORMAT = DateTimeFormatter.ofPattern("M/d/uuuu", Locale.US);
     private static final Pattern DATE_PATTERN = Pattern.compile("\\d{1,2}/\\d{1,2}/\\d{4}");
     private static final Pattern DURATION_PART = Pattern.compile("(\\d+)\\s*([dhms])");
-    private static final DateTimeFormatter OUTPUT_DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+    private static final DateTimeFormatter FALLBACK_OUTPUT_DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
     private static final ExecutorService EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
     public static void sendStatsAsMessage(@NotNull String username) {
@@ -47,13 +57,13 @@ public class PlayerStats {
             msg.append(Component.literal(toPossessive(Stats.name()) + " Stats:\n").withStyle(ChatFormatting.YELLOW));
             msg.append(addLine("Playtime: ", Stats.allTime.prettyPlaytime()));
             msg.append(addLine("Join Date: ", Stats.prettyMemberSince()));
-            msg.append(addLine("Kills: ", String.valueOf(Stats.allTime.kills())));
-            msg.append(addLine("Deaths: ", String.valueOf(Stats.allTime.deaths())));
+            msg.append(addLine("Kills: ", formatNumber(Stats.allTime.kills())));
+            msg.append(addLine("Deaths: ", formatNumber(Stats.allTime.deaths())));
             msg.append(addLine("K/D ratio: ", String.valueOf(Stats.allTime.killDeathRatio())));
             msg.append(Component.literal("==============================").withStyle(ChatFormatting.YELLOW));
             ChatUtils.sendMsg(msg);
         }).exceptionally(e -> {
-            ChatUtils.errorPrefix(chatPrefix, "Failed to load stats for " + username + ": " + e.getMessage());
+            ChatUtils.errorPrefix(chatPrefix, "Failed to load stats for " + username + ": " + errorMessage(e));
             return null;
         });
     }
@@ -64,6 +74,24 @@ public class PlayerStats {
             .append(Component.literal(value + "\n").withStyle(ChatFormatting.WHITE));
     }
 
+    public static void openStatsScreen(@NotNull String username) {
+        WidgetScreen playerStatsScreen = new PlayerStatsScreen(username);
+        playerStatsScreen.parent = null;
+        Utils.screenToOpen = playerStatsScreen;
+    }
+
+    public static String errorMessage(Throwable e) {
+        Throwable cause = (e instanceof CompletionException && e.getCause() != null) ? e.getCause() : e;
+        String message = cause.getMessage();
+        return (message != null && !message.isBlank()) ? message : "Something went wrong";
+    }
+
+    private static DateTimeFormatter getOutputFormat() {
+        StatsModule module = Modules.get().get(StatsModule.class);
+        return module != null ? module.dateFormat.get().formatter() : FALLBACK_OUTPUT_DATE_FORMAT;
+    }
+
+    // fetching
     public static CompletableFuture<Stats> getStatsAsync(@NotNull String username) {
         return CompletableFuture.supplyAsync(() -> getStats(username), EXECUTOR);
     }
@@ -108,9 +136,7 @@ public class PlayerStats {
 
             rows.put(cells.getFirst().trim().toLowerCase(Locale.ROOT), cells.subList(1, 4));
         }
-        if (rows.isEmpty()) {
-            throw new IllegalStateException("Statistics table not found for " + username);
-        }
+        if (rows.isEmpty()) throw new IllegalStateException("Statistics table not found for " + username);
 
         return new Stats(
             name,
@@ -192,7 +218,7 @@ public class PlayerStats {
     }
 
     /**
-     * testing only. Don't use in prod.
+     * for testing
      */
     static void main() {
         Stats s = getStats("Powie69");
@@ -213,11 +239,12 @@ public class PlayerStats {
         public String prettyMemberSince() {
             if (memberSince == null) return "Unknown";
 
+            DateTimeFormatter format = getOutputFormat();
             long daysBetween = ChronoUnit.DAYS.between(memberSince, LocalDate.now());
 
-            if (daysBetween == 0) return memberSince.format(OUTPUT_DATE_FORMAT) + " (today)";
-            if (daysBetween == 1) return memberSince.format(OUTPUT_DATE_FORMAT) + " (1 day ago)";
-            return memberSince.format(OUTPUT_DATE_FORMAT) + " (" + daysBetween + " days ago)";
+            if (daysBetween == 0) return memberSince.format(format) + " (today)";
+            if (daysBetween == 1) return memberSince.format(format) + " (1 day ago)";
+            return memberSince.format(format) + " (" + daysBetween + " days ago)";
         }
 
         public record Period(

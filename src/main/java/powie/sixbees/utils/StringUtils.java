@@ -17,4 +17,8 @@ public class StringUtils {
         boolean endsWithS = trimmed.substring(trimmed.length() - 1).equalsIgnoreCase("s");
         return endsWithS ? trimmed + "'" : trimmed + "'s";
     }
+
+    public static String formatNumber(int number) {
+        return String.format("%,d", number);
+    }
 }

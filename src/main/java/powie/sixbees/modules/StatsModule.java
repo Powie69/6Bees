@@ -5,42 +5,42 @@ import meteordevelopment.meteorclient.settings.KeybindSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
+import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
-import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import powie.sixbees.SixBees;
+import powie.sixbees.utils.PlayerStats;
+
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+import java.util.function.Consumer;
 
 public class StatsModule extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgChat = settings.createGroup("Chat");
-    private final SettingGroup sgScreen = settings.createGroup("Window");
 
     // sgGeneral
-    private final Setting<DateFormat> dateFormat = sgGeneral.add(new EnumSetting.Builder<DateFormat>()
+    public final Setting<DateFormat> dateFormat = sgGeneral.add(new EnumSetting.Builder<DateFormat>()
         .name("date-format")
         .description("Date format")
         .defaultValue(DateFormat.DD_MM_YYYY)
         .build()
     );
 
-    private final Setting<SortPriority> priority = sgGeneral.add(new EnumSetting.Builder<SortPriority>()
-        .name("priority")
-        .description("Which target to select")
-        .defaultValue(SortPriority.ClosestAngle)
-        .build()
-    );
-
-    // sgChat
-    private final Setting<Keybind> chatKeybind = sgChat.add(new KeybindSetting.Builder()
+    private final Setting<Keybind> chatKeybind = sgGeneral.add(new KeybindSetting.Builder()
         .name("chat-keybind")
         .description("Keybind to show stats of a targeted player in chat") // TODO: Improve description
+        .action(() -> onKeybind(PlayerStats::sendStatsAsMessage))
         .build()
     );
 
-    // sgScreen
-    private final Setting<Keybind> screenKeybind = sgScreen.add(new KeybindSetting.Builder()
+    private final Setting<Keybind> screenKeybind = sgGeneral.add(new KeybindSetting.Builder()
         .name("screen-keybind")
         .description("Keybind to show stats of a targeted player in a window gui")
+        .action(() -> onKeybind(PlayerStats::openStatsScreen))
         .build()
     );
 
@@ -52,8 +52,50 @@ public class StatsModule extends Module {
             "Statistics");
     }
 
+    private String getTarget() {
+        if (!Utils.canUpdate() || mc.hitResult == null) return "";
+
+        Vec3 start = mc.player.getEyePosition(1.0f);
+        Vec3 end = start.add(mc.player.getViewVector(1.0f).scale(512));
+
+        Entity target = TargetUtils.get(entity ->
+                entity instanceof Player && entity.getBoundingBox().clip(start, end).isPresent(),
+            SortPriority.LowestDistance);
+
+        if (target != null) return target.getName().getString();
+
+        target = TargetUtils.get(entity -> {
+            if (!(entity instanceof Player player) || entity == mc.player) return false;
+            return !player.isDeadOrDying() && !(player.getHealth() <= 0);
+        }, SortPriority.ClosestAngle);
+
+        if (target == null) return "";
+        return target.getName().getString();
+    }
+
+    private void onKeybind(Consumer<String> action) {
+        String target = getTarget();
+        if (target.isEmpty()) {
+            error("No Player Found");
+            return;
+        }
+        action.accept(target);
+    }
+
     public enum DateFormat {
-        DD_MM_YYYY,
-        MM_DD_YYYY
+        DD_MM_YYYY(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+        MM_DD_YYYY(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
+        MONTH_DD_YYYY(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.US)),
+        MON_DD_YYYY(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.US));
+
+        private final DateTimeFormatter formatter;
+
+        DateFormat(DateTimeFormatter formatter) {
+            this.formatter = formatter;
+        }
+
+        public DateTimeFormatter formatter() {
+            return formatter;
+        }
     }
 }

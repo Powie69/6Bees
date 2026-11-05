@@ -3,12 +3,10 @@ package powie.sixbees.commands;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
-import meteordevelopment.meteorclient.gui.WidgetScreen;
-import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.commands.SharedSuggestionProvider;
-import powie.sixbees.screens.PlayerStatsScreen;
 
+import static powie.sixbees.utils.PlayerStats.openStatsScreen;
 import static powie.sixbees.utils.PlayerStats.sendStatsAsMessage;
 
 public class StatsCommand extends Command {
@@ -25,22 +23,14 @@ public class StatsCommand extends Command {
             ))
             // .stats <player>
             .executes(context -> {
-                String player = StringArgumentType.getString(context, "player");
-                sendStatsAsMessage(player);
+                sendStatsAsMessage(StringArgumentType.getString(context, "player"));
                 return SINGLE_SUCCESS;
             })
             // .stats <player> all
             .then(literal("all").executes(context -> {
-                String player = StringArgumentType.getString(context, "player");
-                openStatsScreen(player);
+                openStatsScreen(StringArgumentType.getString(context, "player"));
                 return SINGLE_SUCCESS;
             }))
         );
-    }
-
-    private void openStatsScreen(String player) {
-        WidgetScreen playerStatsScreen = new PlayerStatsScreen(player);
-        playerStatsScreen.parent = null; // Prevents chat command from staying when pressing ESC
-        Utils.screenToOpen = playerStatsScreen;
     }
 }
