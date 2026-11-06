@@ -1,6 +1,6 @@
 package powie.sixbees.modules;
 
-import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
+import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -9,6 +9,8 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import powie.sixbees.SixBees;
+
+import java.util.regex.Pattern;
 
 public class AutoLogin extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -34,20 +36,22 @@ public class AutoLogin extends Module {
         .build()
     );
 
+    private final Pattern prompt = Pattern.compile("[\\w.-]+, please login with the command: /login <password>");
+
     /**
      * Not added by default because every addon has this ngl
      */
     public AutoLogin() {
         super(SixBees.CATEGORY, "auto-login", "Runs /login command when you join a server.");
-        runInMainMenu = true;
     }
 
     @EventHandler
-    private void onGameJoined(GameJoinedEvent event) {
+    private void onMessageReceived(ReceiveMessageEvent event) {
         if (mc.hasSingleplayerServer()) return;
-        if (password.get().isEmpty()) return;
-        ChatUtils.sendPlayerMsg(command.get() + " " + password.get());
-        if (disableOnRun.get()) disable();
+        if (password.get().trim().isEmpty()) return;
+        if (prompt.matcher(event.getMessage().getString()).matches()) {
+            ChatUtils.sendPlayerMsg(command.get() + " " + password.get(), false);
+            if (disableOnRun.get()) disable();
+        }
     }
-
 }

@@ -38,11 +38,18 @@ public class DoubleEchest extends Module {
         .build()
     );
 
+    private final Setting<ActiveWhen> activeWhen = sgGeneral.add(new EnumSetting.Builder<ActiveWhen>()
+        .name("active-when")
+        .description("is only active when you meet these requirements.")
+        .defaultValue(ActiveWhen.Always)
+        .build()
+    );
+
     private final Set<BlockPos> autoPlacedPositions = new HashSet<>();
 
     /**
      * <P>Known issue: It does weird things if it touches grass 💀</p>
-     *
+     * <p>
      * TODO: Maybe implement own placing logic as Block.place() doesn't seem to work well with these "partial" blocks
      */
     public DoubleEchest() {
@@ -65,6 +72,11 @@ public class DoubleEchest extends Module {
 
         if (autoPlacedPositions.contains(blockPos)) {
             autoPlacedPositions.remove(blockPos);
+            return;
+        }
+
+        if ((activeWhen.get() == ActiveWhen.Sneaking && !mc.player.isShiftKeyDown())
+            || (activeWhen.get() == ActiveWhen.NotSneaking && mc.player.isShiftKeyDown())) {
             return;
         }
 
@@ -118,5 +130,11 @@ public class DoubleEchest extends Module {
         RIGHT,
         FRONT,
         BACK,
+    }
+
+    private enum ActiveWhen {
+        Always,
+        Sneaking,
+        NotSneaking
     }
 }

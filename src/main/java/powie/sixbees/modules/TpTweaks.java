@@ -121,19 +121,20 @@ public class TpTweaks extends Module {
     }
 
     private enum AutoDeny {
-        EVERYONE,
-        NON_FRIENDS,
-        FRIENDS,
-        NO_ONE;
+        EVERYONE("Everyone"),
+        NON_FRIENDS("Non Friends"),
+        FRIENDS("Friends"),
+        NO_ONE("No one");
+
+        private final String label;
+
+        AutoDeny(String label) {
+            this.label = label;
+        }
 
         @Override
         public String toString() {
-            return switch (this) {
-                case EVERYONE -> "Everyone";
-                case NON_FRIENDS -> "Non Friends";
-                case FRIENDS -> "Friends";
-                case NO_ONE -> "No one";
-            };
+            return label;
         }
     }
 }

@@ -25,14 +25,20 @@ public class StatsModule extends Module {
     // sgGeneral
     public final Setting<DateFormat> dateFormat = sgGeneral.add(new EnumSetting.Builder<DateFormat>()
         .name("date-format")
-        .description("Date format")
+        .description("""
+            The date format to use
+             - DD_MM_YYYY: 27/06/2026
+             - MM_DD_YYYY: 06/27/2026
+             - MONTH_DD_YYYY: April 27, 2026
+             - MON_DD_YYYY: Apr 27, 2026
+            """)
         .defaultValue(DateFormat.DD_MM_YYYY)
         .build()
     );
 
     private final Setting<Keybind> chatKeybind = sgGeneral.add(new KeybindSetting.Builder()
         .name("chat-keybind")
-        .description("Keybind to show stats of a targeted player in chat") // TODO: Improve description
+        .description("Keybind to show stats of a targeted player in chat")
         .action(() -> onKeybind(PlayerStats::sendStatsAsMessage))
         .build()
     );
@@ -47,7 +53,7 @@ public class StatsModule extends Module {
     public StatsModule() {
         super(SixBees.CATEGORY,
             "Stats",
-            "An example module that highlights the center of the world.",
+            "Shows statistics of a player on keybind press",
             "Player Statistics",
             "Statistics");
     }
