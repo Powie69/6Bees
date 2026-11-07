@@ -6,20 +6,27 @@ import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import meteordevelopment.meteorclient.utils.player.SwingMode;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EnderChestBlock;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import powie.sixbees.SixBees;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class DoubleEchest extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -47,11 +54,6 @@ public class DoubleEchest extends Module {
 
     private final Set<BlockPos> autoPlacedPositions = new HashSet<>();
 
-    /**
-     * <P>Known issue: It does weird things if it touches grass 💀</p>
-     * <p>
-     * TODO: Maybe implement own placing logic as Block.place() doesn't seem to work well with these "partial" blocks
-     */
     public DoubleEchest() {
         super(SixBees.CATEGORY,
             "double-echest",
@@ -114,13 +116,18 @@ public class DoubleEchest extends Module {
             if (!mc.level.isUnobstructed(echest.defaultBlockState(), targetPos, CollisionContext.empty())) continue;
 
             autoPlacedPositions.add(targetPos);
-            boolean placed = BlockUtils.place(
-                targetPos,
-                InvUtils.findInHotbar(itemStack -> Block.byItem(itemStack.getItem()) instanceof EnderChestBlock),
-                0
-            );
+            FindItemResult echestItem = InvUtils.findInHotbar(itemStack -> Block.byItem(itemStack.getItem()) instanceof EnderChestBlock);
+            if (!echestItem.found()) return;
 
-            if (!placed) autoPlacedPositions.remove(targetPos);
+            InteractionResult result = mc.gameMode.useItemOn(
+                mc.player,
+                echestItem.getHand(),
+                new BlockHitResult(Vec3.atCenterOf(targetPos), Direction.DOWN, targetPos, false));
+
+            if (result instanceof InteractionResult.Success success
+                && success.swingSource() == InteractionResult.SwingSource.PREDICTED) {
+                SwingMode.of(true).interactSwing(echestItem.getHand());
+            }
             return;
         }
     }

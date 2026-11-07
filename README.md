@@ -22,11 +22,14 @@ Please give suggestions on [issues tab](https://github.com/Powie69/6Bees/issues)
 - **Anti Web**: Prevents you from walking into webs. (but not falling into them)
 - **Auto Whisper**: Automatically whispers a message to someone whenever they say a specified keyword.
 - **Base Macro**: Runs a macro when you enter and leave a base.
+- **Double Echest**: Automatically creates a double Ender chest when you place one.
 - **Free Home**: Gives you 2 extra free homes (Not clickbait I swear)
 - **MapId Nametags**: Shows the id of maps as nametags
 - **No Block Entities**: Disables rendering for specified block entities (e.g. chest, shulkers, etc). supports radius
 - **NSFW maparts blocker**: Blocks rendering of naughty maparts. This will reference a database.
 - **Show Map Id**: Will always show the map ID of maps in its tooltips.
+- **Stats**: Shows statistics of the player nearest to your crosshair
+- **Tp Tweaks**: TP related utilities
 
 ### HUD
 - **Base Name**: Shows the name of your current base.
@@ -37,6 +40,7 @@ Please give suggestions on [issues tab](https://github.com/Powie69/6Bees/issues)
 ### Commands
 - **add-base**: Adds a new base to the base system.
 - **get-map-id**: Gets the map ID of the current map that you're looking at or holding
+- **stats**: Shows statistics of a specified player
 
 ### Base system
 

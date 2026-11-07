@@ -1,17 +1,16 @@
 package powie.sixbees.modules;
 
-import meteordevelopment.meteorclient.settings.EnumSetting;
-import meteordevelopment.meteorclient.settings.KeybindSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
+import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3d;
 import powie.sixbees.SixBees;
 import powie.sixbees.utils.PlayerStats;
 
@@ -27,8 +26,8 @@ public class StatsModule extends Module {
         .name("date-format")
         .description("""
             The date format to use
-             - DD_MM_YYYY: 27/06/2026
-             - MM_DD_YYYY: 06/27/2026
+             - DD_MM_YYYY: 27/04/2026
+             - MM_DD_YYYY: 04/27/2026
              - MONTH_DD_YYYY: April 27, 2026
              - MON_DD_YYYY: Apr 27, 2026
             """)
@@ -36,16 +35,23 @@ public class StatsModule extends Module {
         .build()
     );
 
+    private final Setting<Boolean> ignoreOffsreenPlayer = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-offscreen-players")
+        .description("Won't target players that you can't see")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Keybind> chatKeybind = sgGeneral.add(new KeybindSetting.Builder()
         .name("chat-keybind")
-        .description("Keybind to show stats of a targeted player in chat")
+        .description("Keybind to show the player's statistics in chat")
         .action(() -> onKeybind(PlayerStats::sendStatsAsMessage))
         .build()
     );
 
     private final Setting<Keybind> screenKeybind = sgGeneral.add(new KeybindSetting.Builder()
         .name("screen-keybind")
-        .description("Keybind to show stats of a targeted player in a window gui")
+        .description("Keybind to open the player's statistics in a GUI")
         .action(() -> onKeybind(PlayerStats::openStatsScreen))
         .build()
     );
@@ -53,7 +59,7 @@ public class StatsModule extends Module {
     public StatsModule() {
         super(SixBees.CATEGORY,
             "Stats",
-            "Shows statistics of a player on keybind press",
+            "Shows statistics of the player nearest to your crosshair",
             "Player Statistics",
             "Statistics");
     }
@@ -72,6 +78,12 @@ public class StatsModule extends Module {
 
         target = TargetUtils.get(entity -> {
             if (!(entity instanceof Player player) || entity == mc.player) return false;
+            if (ignoreOffsreenPlayer.get()) { // if their
+            Vector3d pos = new Vector3d(entity.xo, entity.yo, entity.zo);
+                if (!NametagUtils.to2D(pos, 1, false, false)) return false;
+                if (pos.x <= 0 || pos.x >= mc.getWindow().getWidth()) return false;
+                if (pos.y <= 0 || pos.y >= mc.getWindow().getHeight()) return false;
+            }
             return !player.isDeadOrDying() && !(player.getHealth() <= 0);
         }, SortPriority.ClosestAngle);
 
