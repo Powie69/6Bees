@@ -35,6 +35,7 @@ dependencies {
 
     // Jsoup
     implementation(libs.jsoup)
+//    include(libs.jsoup)
 }
 
 java {

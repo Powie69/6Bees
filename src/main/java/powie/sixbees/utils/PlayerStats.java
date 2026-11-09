@@ -32,11 +32,10 @@ import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static powie.sixbees.SixBees.LOG;
 import static powie.sixbees.utils.StringUtils.formatNumber;
 import static powie.sixbees.utils.StringUtils.toPossessive;
 
-// This is so brainrot
-// TODO: unslop
 public class PlayerStats {
     private static final String BASE_URL = "https://www.6b6t.org/stats/";
 
@@ -63,6 +62,7 @@ public class PlayerStats {
             msg.append(Component.literal("==============================").withStyle(ChatFormatting.YELLOW));
             ChatUtils.sendMsg(msg);
         }).exceptionally(e -> {
+            LOG.error("Failed to load stats for {}", username, e);
             ChatUtils.errorPrefix(chatPrefix, "Failed to load stats for " + username + ": " + errorMessage(e));
             return null;
         });
@@ -204,6 +204,8 @@ public class PlayerStats {
      */
     private static Duration duration(Map<String, List<String>> rows, int col) {
         Matcher m = DURATION_PART.matcher(cell(rows, "playtime", col));
+        String text = cell(rows, "playtime", col).trim();
+        if (text.startsWith("<")) return Duration.ZERO; // "< 1h" means under an hour, exact value unknown
         Duration total = Duration.ZERO;
         while (m.find()) {
             long amount = Long.parseLong(m.group(1));
@@ -211,6 +213,7 @@ public class PlayerStats {
                 case "d" -> Duration.ofDays(amount);
                 case "h" -> Duration.ofHours(amount);
                 case "m" -> Duration.ofMinutes(amount);
+                // minute part might be dead code. keeping just in case there's some edge case
                 default -> Duration.ofSeconds(amount);
             });
         }
@@ -223,9 +226,10 @@ public class PlayerStats {
     static void main() {
         Stats s = getStats("Powie69");
         System.out.println(s.name());
-        System.out.println("member since: " + s.prettyMemberSince());
+//        System.out.println("member since: " + s.prettyMemberSince());
         System.out.println("All time kills: " + s.allTime().kills());
         System.out.println("All time K/D: " + s.allTime().killDeathRatio());
+        System.out.println("playtime: " + s.allTime().prettyPlaytime());
         System.out.println(s);
     }
 
@@ -239,12 +243,14 @@ public class PlayerStats {
         public String prettyMemberSince() {
             if (memberSince == null) return "Unknown";
 
-            DateTimeFormatter format = getOutputFormat();
+            String date = memberSince.format(getOutputFormat());
             long daysBetween = ChronoUnit.DAYS.between(memberSince, LocalDate.now());
-
-            if (daysBetween == 0) return memberSince.format(format) + " (today)";
-            if (daysBetween == 1) return memberSince.format(format) + " (1 day ago)";
-            return memberSince.format(format) + " (" + daysBetween + " days ago)";
+            String suffix = switch ((int) daysBetween) {
+                case 0 -> " (today)";
+                case 1 -> " (1 day ago)";
+                default -> " (" + daysBetween + " days ago)";
+            };
+            return date + suffix;
         }
 
         public record Period(
@@ -270,6 +276,7 @@ public class PlayerStats {
             }
 
             public String prettyPlaytime() {
+                if (playtime.isZero()) return "< 1h";
                 long days = playtime.toDays();
                 long hours = playtime.toHoursPart();
                 long minutes = playtime.toMinutesPart();

@@ -14,6 +14,7 @@ import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
+import static powie.sixbees.SixBees.LOG;
 import static powie.sixbees.utils.StringUtils.formatNumber;
 import static powie.sixbees.utils.StringUtils.toPossessive;
 
@@ -46,11 +47,11 @@ public class PlayerStatsScreen extends WindowScreen {
                 fillMoreTable(moreTable, Stats);
             });
         }).exceptionally(e -> {
+            LOG.error("Failed to load stats for {}", username, e);
             mc.execute(() -> fillInfoTable(infoTable, PlayerStats.errorMessage(e)));
             return null;
         });
 
-//        add(theme.horizontalSeparator()).expandX();
         WHorizontalList footer = add(theme.horizontalList()).expandX().widget();
         footer.add(theme.label("6Bees Addon").color(new Color(255, 206, 43))).padLeft(6);
         footer.add(theme.label("Press ESC to close")).expandCellX().right();

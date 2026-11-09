@@ -65,7 +65,7 @@ public class StatsModule extends Module {
     }
 
     private String getTarget() {
-        if (!Utils.canUpdate() || mc.hitResult == null) return "";
+        if (!Utils.canUpdate()) return "";
 
         Vec3 start = mc.player.getEyePosition(1.0f);
         Vec3 end = start.add(mc.player.getViewVector(1.0f).scale(512));
@@ -78,7 +78,7 @@ public class StatsModule extends Module {
 
         target = TargetUtils.get(entity -> {
             if (!(entity instanceof Player player) || entity == mc.player) return false;
-            if (ignoreOffsreenPlayer.get()) { // if their
+            if (ignoreOffsreenPlayer.get()) { // if their feet are offscreen tehey dont get selected
             Vector3d pos = new Vector3d(entity.xo, entity.yo, entity.zo);
                 if (!NametagUtils.to2D(pos, 1, false, false)) return false;
                 if (pos.x <= 0 || pos.x >= mc.getWindow().getWidth()) return false;
@@ -92,6 +92,7 @@ public class StatsModule extends Module {
     }
 
     private void onKeybind(Consumer<String> action) {
+        if (mc.gui.screen() != null) return;
         String target = getTarget();
         if (target.isEmpty()) {
             error("No Player Found");
