@@ -32,10 +32,6 @@ dependencies {
 
     // Gson
     implementation(libs.gson)
-
-    // Jsoup
-    implementation(libs.jsoup)
-//    include(libs.jsoup)
 }
 
 java {

@@ -30,9 +30,6 @@ meteor-client = { module = "meteordevelopment:meteor-client", version.ref = "met
 # Gson
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
-jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
-
-
 # Mods
 
 [plugins]

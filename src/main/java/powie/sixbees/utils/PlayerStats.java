@@ -8,27 +8,25 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.NotNull;
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import powie.sixbees.modules.StatsModule;
 import powie.sixbees.screens.PlayerStatsScreen;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,12 +38,33 @@ public class PlayerStats {
     private static final String BASE_URL = "https://www.6b6t.org/stats/";
 
     private static final DateTimeFormatter MEMBER_SINCE_FORMAT = DateTimeFormatter.ofPattern("M/d/uuuu", Locale.US);
-    private static final Pattern DATE_PATTERN = Pattern.compile("\\d{1,2}/\\d{1,2}/\\d{4}");
-    private static final Pattern DURATION_PART = Pattern.compile("(\\d+)\\s*([dhms])");
 
     private static final DateTimeFormatter FALLBACK_OUTPUT_DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    private static final Map<String, CompletableFuture<Stats>> IN_FLIGHT_REQUEST = new ConcurrentHashMap<>();
+
+     // jsoup is ~480kb which would ~3x the built jars size, so I used regex as a compromise
+     // yes it's ugly.
+     // I hope this doesn't bite me in the ass in the future.
+    private static final int REGEX_FLAGS = Pattern.DOTALL | Pattern.CASE_INSENSITIVE;
+    private static final Pattern DURATION_PART = Pattern.compile("(\\d+)\\s*([dhms])");
+    private static final Pattern H1_PATTERN = Pattern.compile("<h1\\b[^>]*>(.*?)</h1\\s*>", REGEX_FLAGS);
+    private static final Pattern ROW_PATTERN = Pattern.compile("<tr\\b[^>]*>(.*?)</tr\\s*>", REGEX_FLAGS);
+    private static final Pattern CELL_PATTERN = Pattern.compile("<t[hd]\\b[^>]*>(.*?)</t[hd]\\s*>", REGEX_FLAGS);
+    // "Member since" followed by (optional tags / whitespace / comments) and then the date
+    private static final Pattern MEMBER_SINCE_PATTERN = Pattern.compile(
+        "Member\\s+since(?:\\s|&nbsp;|<[^>]*>)*?(\\d{1,2}/\\d{1,2}/\\d{4})", REGEX_FLAGS);
+    private static final Pattern COMMENT_PATTERN = Pattern.compile("<!--.*?-->", Pattern.DOTALL);
+    private static final Pattern TAG_PATTERN = Pattern.compile("<[^>]*>", Pattern.DOTALL);
+    private static final Pattern ENTITY_PATTERN = Pattern.compile("&(#x[0-9a-fA-F]+|#\\d+|[a-zA-Z]+);");
+    private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
 
     private static final ExecutorService EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
+
+    private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+        .followRedirects(HttpClient.Redirect.NORMAL)
+        .connectTimeout(java.time.Duration.ofSeconds(10))
+        .executor(EXECUTOR)
+        .build();
 
     public static void sendStatsAsMessage(@NotNull String username) {
         String chatPrefix = "Player Stats";
@@ -93,16 +112,30 @@ public class PlayerStats {
 
     // fetching
     public static CompletableFuture<Stats> getStatsAsync(@NotNull String username) {
-        return CompletableFuture.supplyAsync(() -> getStats(username), EXECUTOR);
+        String key = username.toLowerCase();
+        CompletableFuture<Stats> future = new CompletableFuture<>();
+        CompletableFuture<Stats> existing = IN_FLIGHT_REQUEST.putIfAbsent(key, future);
+        if (existing != null) return existing;
+
+        CompletableFuture.supplyAsync(() -> getStats(username), EXECUTOR)
+            .whenComplete((result, error) -> {
+                IN_FLIGHT_REQUEST.remove(key);
+                if (error != null) future.completeExceptionally(error);
+                else future.complete(result);
+            });
+
+        return future;
     }
 
-    private static Document getStatsPage(@NotNull String username) {
+    private static String getStatsPage(@NotNull String username) {
         try {
-            Connection.Response response = Jsoup.connect(BASE_URL + username)
-                .userAgent("Mozilla/5.0")
-                .timeout(10000)
-                .ignoreHttpErrors(true)
-                .execute();
+            HttpRequest request = HttpRequest.newBuilder(URI.create(BASE_URL + username))
+                .header("User-Agent", "Mozilla/5.0")
+                .timeout(java.time.Duration.ofSeconds(10))
+                .GET()
+                .build();
+
+            HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
 
             int status = response.statusCode();
             if (status == 404) {
@@ -113,25 +146,72 @@ public class PlayerStats {
                     "Failed to load stats for " + username + " (HTTP " + status + ")");
             }
 
-            return response.parse();
+            return response.body();
         } catch (IOException e) {
             throw new RuntimeException("Failed to load stats page for " + username, e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Interrupted while loading stats page for " + username, e);
         }
     }
 
     /**
-     * I let Claude do all the CSS queries
+     * Strips comments + tags, decodes entities and collapses whitespace
      */
-    public static Stats getStats(@NotNull String username) {
-        Document doc = getStatsPage(username);
+    private static String text(String html) {
+        String s = COMMENT_PATTERN.matcher(html).replaceAll("");
+        s = TAG_PATTERN.matcher(s).replaceAll("");
+        s = decodeEntities(s);
+        return WHITESPACE_PATTERN.matcher(s).replaceAll(" ").trim();
+    }
 
-        Element heading = doc.selectFirst("h1");
-        String name = heading != null ? heading.text().trim() : username; // because casing
+    private static String decodeEntities(String s) {
+        if (s.indexOf('&') < 0) return s;
+
+        Matcher m = ENTITY_PATTERN.matcher(s);
+        StringBuilder sb = new StringBuilder();
+        while (m.find()) {
+            String e = m.group(1);
+            String replacement = switch (e) {
+                case "amp" -> "&";
+                case "lt" -> "<";
+                case "gt" -> ">";
+                case "quot" -> "\"";
+                case "apos" -> "'";
+                case "nbsp" -> " ";
+                default -> {
+                    try {
+                        if (e.startsWith("#x") || e.startsWith("#X")) {
+                            yield new String(Character.toChars(Integer.parseInt(e.substring(2), 16)));
+                        } else if (e.startsWith("#")) {
+                            yield new String(Character.toChars(Integer.parseInt(e.substring(1))));
+                        }
+                    } catch (IllegalArgumentException ignored) {
+                    }
+                    yield m.group(); // unknown entity, leave as is
+                }
+            };
+            m.appendReplacement(sb, Matcher.quoteReplacement(replacement));
+        }
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
+    public static Stats getStats(@NotNull String username) {
+        String html = getStatsPage(username);
+
+        Matcher heading = H1_PATTERN.matcher(html);
+        String headingText = heading.find() ? text(heading.group(1)) : "";
+        String name = !headingText.isEmpty() ? headingText : username; // because casing
 
         // label -> [7 days, 30 days, all time]
         Map<String, List<String>> rows = new HashMap<>();
-        for (Element row : doc.select("table tr")) {
-            List<String> cells = row.select("th, td").eachText();
+        Matcher rowMatcher = ROW_PATTERN.matcher(html);
+        while (rowMatcher.find()) {
+            List<String> cells = new ArrayList<>();
+            Matcher cellMatcher = CELL_PATTERN.matcher(rowMatcher.group(1));
+            while (cellMatcher.find()) cells.add(text(cellMatcher.group(1)));
+
             if (cells.size() < 4 || cells.getFirst().equalsIgnoreCase("Statistic")) continue;
 
             rows.put(cells.getFirst().trim().toLowerCase(Locale.ROOT), cells.subList(1, 4));
@@ -140,21 +220,18 @@ public class PlayerStats {
 
         return new Stats(
             name,
-            parseMemberSince(doc),
+            parseMemberSince(html),
             buildPeriod(rows, 0),
             buildPeriod(rows, 1),
             buildPeriod(rows, 2)
         );
     }
 
-    private static LocalDate parseMemberSince(Document doc) {
-        Element el = doc.selectFirst(":containsOwn(Member since)");
-        if (el == null) return null;
-
-        Matcher m = DATE_PATTERN.matcher(el.text());
+    private static LocalDate parseMemberSince(String html) {
+        Matcher m = MEMBER_SINCE_PATTERN.matcher(html);
         if (!m.find()) return null;
         try {
-            return LocalDate.parse(m.group(), MEMBER_SINCE_FORMAT);
+            return LocalDate.parse(m.group(1), MEMBER_SINCE_FORMAT);
         } catch (DateTimeException e) {
             return null;
         }

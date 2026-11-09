@@ -78,8 +78,11 @@ public class StatsModule extends Module {
 
         target = TargetUtils.get(entity -> {
             if (!(entity instanceof Player player) || entity == mc.player) return false;
-            if (ignoreOffsreenPlayer.get()) { // if their feet are offscreen tehey dont get selected
-            Vector3d pos = new Vector3d(entity.xo, entity.yo, entity.zo);
+            if (ignoreOffsreenPlayer.get()) {
+                // if their feet are offscreen they don't get selected
+                // Also happens in meteor's tracer with offscreen mode
+                // TODO: "fix" it on meteor then fix it here
+                Vector3d pos = new Vector3d(entity.xo, entity.yo, entity.zo);
                 if (!NametagUtils.to2D(pos, 1, false, false)) return false;
                 if (pos.x <= 0 || pos.x >= mc.getWindow().getWidth()) return false;
                 if (pos.y <= 0 || pos.y >= mc.getWindow().getHeight()) return false;
