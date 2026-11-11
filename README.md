@@ -4,7 +4,8 @@
 
 <h1>6Bees</h1>
 
-[![Download Latest Release](https://img.shields.io/github/v/release/Powie69/6bees?sort=semver&style=for-the-badge&label=DOWNLOAD&labelColor=ffce2b&color=321e19)](https://github.com/Powie69/6Bees/releases)
+[![Download Latest Release](https://img.shields.io/github/v/release/Powie69/6bees?sort=semver&style=for-the-badge&label=DOWNLOAD%20now&labelColor=ffce2b&color=321e19)](https://github.com/Powie69/6Bees/releases)<br>
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/powie69/6bees/total?style=for-the-badge&label=Total%20Downloads:&labelColor=ffce2b&color=321e19)
 
 </div>
 
@@ -23,13 +24,14 @@ Please give suggestions on [issues tab](https://github.com/Powie69/6Bees/issues)
 - **Auto Whisper**: Automatically whispers a message to someone whenever they say a specified keyword.
 - **Base Macro**: Runs a macro when you enter and leave a base.
 - **Double Echest**: Automatically creates a double Ender chest when you place one.
-- **Free Home**: Gives you 2 extra free homes (Not clickbait I swear)
+- **Free Home**: Gives you 2 extra free homes.
 - **MapId Nametags**: Shows the id of maps as nametags
 - **No Block Entities**: Disables rendering for specified block entities (e.g. chest, shulkers, etc). supports radius
 - **NSFW maparts blocker**: Blocks rendering of naughty maparts. This will reference a database.
 - **Show Map Id**: Will always show the map ID of maps in its tooltips.
 - **Stats**: Shows statistics of the player nearest to your crosshair
 - **Tp Tweaks**: TP related utilities
+- **Verification link**: Shows a button to open anti-bot verification link
 
 ### HUD
 - **Base Name**: Shows the name of your current base.
@@ -40,6 +42,7 @@ Please give suggestions on [issues tab](https://github.com/Powie69/6Bees/issues)
 ### Commands
 - **add-base**: Adds a new base to the base system.
 - **get-map-id**: Gets the map ID of the current map that you're looking at or holding
+- **seedmap**: Opens a seedmap in your browser with your current location
 - **stats**: Shows statistics of a specified player
 
 ### Base system

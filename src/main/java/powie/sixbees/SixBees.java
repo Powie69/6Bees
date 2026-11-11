@@ -20,6 +20,7 @@ import powie.sixbees.commands.Seedmap;
 import powie.sixbees.events.ChatListener;
 import powie.sixbees.hud.SixBeesStarscript;
 import powie.sixbees.hud.TextPresets;
+import powie.sixbees.utils.GlobalSettings;
 import powie.sixbees.modules.*;
 import powie.sixbees.tabs.BaseTab;
 
@@ -40,7 +41,7 @@ public class SixBees extends MeteorAddon {
         initializeConfig();
 
         if (isDevEnvOrHasExtraArgs()) {
-            // hacky way to avoid getting addon scrapped
+            // avoid getting addon scrapped as these are extra/dev modules
             List<Module> devModules = List.of(
                 new AutoLogin(),
                 new ExportMapId()
@@ -80,6 +81,8 @@ public class SixBees extends MeteorAddon {
 
         // Event listeners
         new ChatListener();
+
+        GlobalSettings.init();
     }
 
     @PostInit
