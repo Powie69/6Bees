@@ -5,7 +5,7 @@
 <h1>6Bees</h1>
 
 [![Download Latest Release](https://img.shields.io/github/v/release/Powie69/6bees?sort=semver&style=for-the-badge&label=DOWNLOAD%20now&labelColor=ffce2b&color=321e19)](https://github.com/Powie69/6Bees/releases)<br>
-![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/powie69/6bees/total?style=for-the-badge&label=Total%20Downloads:&labelColor=ffce2b&color=321e19)
+[![Total Downloads](https://img.shields.io/github/downloads/powie69/6bees/total?style=for-the-badge&label=Total%20Downloads:&labelColor=ffce2b&color=321e19)](https://github.com/Powie69/6Bees/releases)
 
 </div>
 

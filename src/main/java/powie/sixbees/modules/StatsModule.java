@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 import powie.sixbees.SixBees;
-import powie.sixbees.utils.PlayerStats;
+import powie.sixbees.utils.stats.PlayerStats;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;

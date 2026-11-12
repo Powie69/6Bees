@@ -6,8 +6,8 @@ import meteordevelopment.meteorclient.commands.Command;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.commands.SharedSuggestionProvider;
 
-import static powie.sixbees.utils.PlayerStats.openStatsScreen;
-import static powie.sixbees.utils.PlayerStats.sendStatsAsMessage;
+import static powie.sixbees.utils.stats.PlayerStats.openStatsScreen;
+import static powie.sixbees.utils.stats.PlayerStats.sendStatsAsMessage;
 
 public class StatsCommand extends Command {
     public StatsCommand() {

@@ -38,7 +38,10 @@ public class Config {
 
     private static volatile Map<String, Base> cachedBases;
 
+    public static boolean firstLaunch;
+
     public static void initializeConfig() {
+        firstLaunch = !Files.exists(MAPS_FILE);
         try {
             Files.createDirectories(CONFIG_FOLDER);
         } catch (IOException e) {

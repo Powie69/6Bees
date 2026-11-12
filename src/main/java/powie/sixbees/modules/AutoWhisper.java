@@ -64,7 +64,7 @@ public class AutoWhisper extends Module {
         .name("message")
         .description("The list of possible messages to whisper. (randomly selected)")
         .defaultValue(List.of("Get kits at discord.gg/link"))
-        .onChanged(_ -> validateMessageToSend())
+//        .onChanged(_ -> validateMessageToSend())
         .build()
     );
 

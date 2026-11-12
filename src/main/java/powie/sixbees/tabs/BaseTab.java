@@ -1,6 +1,7 @@
 package powie.sixbees.tabs;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.tabs.Tab;
@@ -15,6 +16,7 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.Dimension;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
+import org.jetbrains.annotations.NotNull;
 import powie.sixbees.utils.BaseUtils;
 import powie.sixbees.utils.BaseUtils.Base;
 
@@ -56,7 +58,7 @@ public class BaseTab extends Tab {
             add(theme.horizontalSeparator()).expandX();
 
             WButton addNew = add(theme.button("Add new base")).expandX().widget();
-            addNew.action = () -> mc.gui.setScreen(new AddBaseScreen(theme, null, UUID.randomUUID().toString(), this));
+            addNew.action = () -> mc.gui.setScreen(new AddBaseScreen(this));
         }
 
         private void initTable(WTable table) {
@@ -76,7 +78,7 @@ public class BaseTab extends Tab {
                     table.add(theme.label(baseValue.name));
 
                     WButton edit = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().right().widget();
-                    edit.action = () -> mc.gui.setScreen(new AddBaseScreen(theme, baseValue, BaseKey, this));
+                    edit.action = () -> mc.gui.setScreen(new AddBaseScreen(baseValue, BaseKey, this));
 
                     WConfirmedMinus delete = table.add(theme.confirmedMinus()).right().widget();
                     delete.action = () -> {
@@ -94,15 +96,31 @@ public class BaseTab extends Tab {
         private final boolean isEdit;
         private final Base base;
         private final String baseId;
-        private final BaseTabScreen parent;
+        private final BaseTabScreen parentWindow;
 
-        public AddBaseScreen(GuiTheme theme, Base base, String baseId, BaseTabScreen parent) {
-            super(theme, base != null ? "Edit \"" + base.name + "\"" : "New Base");
+        /**
+         * for adding new bases
+         */
+        public AddBaseScreen(BaseTabScreen parentWindow) {
+            super(GuiThemes.get(), "New Base");
             settings = new AddBaseSettings();
-            this.isEdit = base != null;
+            isEdit = false;
+            base = null;
+            baseId = UUID.randomUUID().toString();
+            this.parentWindow = parentWindow;
+            parent = null;
+        }
+
+        /**
+         * for editing existing bases
+         */
+        public AddBaseScreen(@NotNull Base base, @NotNull String baseId, BaseTabScreen parentWindow) {
+            super(GuiThemes.get(), "Edit \"" + base.name + "\"");
+            settings = new AddBaseSettings();
+            isEdit = true;
             this.base = base;
             this.baseId = baseId;
-            this.parent = parent;
+            this.parentWindow = parentWindow;
         }
 
         @Override
@@ -127,7 +145,7 @@ public class BaseTab extends Tab {
             enterAction = this::saveCoords;
 
             WButton cancelBtn = actionButtons.add(theme.button("Cancel")).expandX().widget();
-            cancelBtn.action = () -> mc.gui.setScreen(parent);
+            cancelBtn.action = () -> mc.gui.setScreen(parentWindow);
         }
 
         private void saveCoords() {
@@ -139,11 +157,11 @@ public class BaseTab extends Tab {
                     settings.coords.get(),
                     settings.radius.get(),
                     settings.dimension.get()));
-            if (parent != null) {
-                parent.bases = newBaseData;
-                parent.reload();
+            if (parentWindow != null) {
+                parentWindow.bases = newBaseData;
+                parentWindow.reload();
             }
-            mc.gui.setScreen(parent);
+            mc.gui.setScreen(parentWindow);
         }
     }
 

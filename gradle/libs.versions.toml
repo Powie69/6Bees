@@ -1,5 +1,5 @@
 [versions]
-mod-version = "0.2.0"
+mod-version = "0.2.1"
 
 # Fabric (https://fabricmc.net/develop)
 jdk = "25"
@@ -14,8 +14,6 @@ meteor = "26.3-SNAPSHOT"
 
 # Gson
 gson = "2.10.1"
-
-jsoup = "1.24.1"
 
 # Mods
 

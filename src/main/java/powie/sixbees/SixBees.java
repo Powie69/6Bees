@@ -15,18 +15,18 @@ import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import powie.sixbees.commands.AddBase;
 import powie.sixbees.commands.GetMapId;
-import powie.sixbees.commands.StatsCommand;
 import powie.sixbees.commands.Seedmap;
+import powie.sixbees.commands.StatsCommand;
 import powie.sixbees.events.ChatListener;
 import powie.sixbees.hud.SixBeesStarscript;
 import powie.sixbees.hud.TextPresets;
-import powie.sixbees.utils.GlobalSettings;
 import powie.sixbees.modules.*;
 import powie.sixbees.tabs.BaseTab;
 
 import java.util.List;
 
 import static powie.sixbees.utils.Checks.isDevEnvOrHasExtraArgs;
+import static powie.sixbees.utils.Config.firstLaunch;
 import static powie.sixbees.utils.Config.initializeConfig;
 
 public class SixBees extends MeteorAddon {
@@ -65,6 +65,7 @@ public class SixBees extends MeteorAddon {
         Modules.get().add(new ShowMapId());
         Modules.get().add(new StatsModule());
         Modules.get().add(new TpTweaks());
+        Modules.get().add(new VerificationLink());
 
         // Commands
         Commands.add(new GetMapId());
@@ -81,13 +82,16 @@ public class SixBees extends MeteorAddon {
 
         // Event listeners
         new ChatListener();
-
-        GlobalSettings.init();
     }
 
     @PostInit
     public static void postInit() {
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) Modules.get().get(AutoLogin.class).enable();
+
+        if (firstLaunch) {
+            Modules.get().get(FreeHome.class).enable();
+            Modules.get().get(VerificationLink.class).enable();
+        }
     }
 
     @Override

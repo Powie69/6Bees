@@ -6,8 +6,8 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.containers.WSection;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import powie.sixbees.utils.PlayerStats;
-import powie.sixbees.utils.PlayerStats.Stats.Period;
+import powie.sixbees.utils.stats.PlayerStats;
+import powie.sixbees.utils.stats.PlayerStats.Stats.Period;
 
 import java.util.List;
 import java.util.function.Function;
