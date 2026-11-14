@@ -26,8 +26,8 @@ import powie.sixbees.tabs.BaseTab;
 import java.util.List;
 
 import static powie.sixbees.utils.Checks.isDevEnvOrHasExtraArgs;
-import static powie.sixbees.utils.Config.firstLaunch;
 import static powie.sixbees.utils.Config.initializeConfig;
+import static powie.sixbees.utils.Config.isFirstTimeUsing;
 
 public class SixBees extends MeteorAddon {
     public static final Logger LOG = LogUtils.getLogger();
@@ -88,7 +88,7 @@ public class SixBees extends MeteorAddon {
     public static void postInit() {
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) Modules.get().get(AutoLogin.class).enable();
 
-        if (firstLaunch) {
+        if (isFirstTimeUsing) {
             Modules.get().get(FreeHome.class).enable();
             Modules.get().get(VerificationLink.class).enable();
         }
