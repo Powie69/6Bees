@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WConfirmedMinus;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.Dimension;
 import net.minecraft.client.gui.screens.Screen;
@@ -92,7 +93,7 @@ public class BaseTab extends Tab {
     }
 
     public static class AddBaseScreen extends WindowScreen {
-        private final AddBaseSettings settings;
+        private final AddBaseSettings settings = new AddBaseSettings();
         private final boolean isEdit;
         private final Base base;
         private final String baseId;
@@ -103,7 +104,6 @@ public class BaseTab extends Tab {
          */
         public AddBaseScreen(BaseTabScreen parentWindow) {
             super(GuiThemes.get(), "New Base");
-            settings = new AddBaseSettings();
             isEdit = false;
             base = null;
             baseId = UUID.randomUUID().toString();
@@ -116,7 +116,6 @@ public class BaseTab extends Tab {
          */
         public AddBaseScreen(@NotNull Base base, @NotNull String baseId, BaseTabScreen parentWindow) {
             super(GuiThemes.get(), "Edit \"" + base.name + "\"");
-            settings = new AddBaseSettings();
             isEdit = true;
             this.base = base;
             this.baseId = baseId;
@@ -126,10 +125,10 @@ public class BaseTab extends Tab {
         @Override
         public void initWidgets() {
             if (isEdit) {
-                settings.name.set(this.base.name);
-                settings.coords.set(this.base.coords);
-                settings.radius.set(this.base.radius);
-                settings.dimension.set(this.base.dimension);
+                settings.name.set(base.name);
+                settings.coords.set(base.coords);
+                settings.radius.set(base.radius);
+                settings.dimension.set(base.dimension);
             } else if (mc.player != null) {
                 settings.coords.set(BlockPos.containing(mc.player.position()));
                 settings.dimension.set(PlayerUtils.getDimension());
@@ -149,7 +148,7 @@ public class BaseTab extends Tab {
         }
 
         private void saveCoords() {
-            if (settings.name.get().isBlank()) return;
+            if (settings.name.get().trim().isBlank()) return;
             Map<String, Base> newBaseData = BaseUtils.saveBase(
                 baseId,
                 new Base(
@@ -160,6 +159,8 @@ public class BaseTab extends Tab {
             if (parentWindow != null) {
                 parentWindow.bases = newBaseData;
                 parentWindow.reload();
+            } else {
+                ChatUtils.infoPrefix("Bases", settings.name.get().trim() + " saved.");
             }
             mc.gui.setScreen(parentWindow);
         }

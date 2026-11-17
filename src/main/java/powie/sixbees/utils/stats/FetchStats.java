@@ -158,8 +158,8 @@ public class FetchStats {
     private static PlayerStats.Stats.Period buildPeriod(Map<String, List<String>> rows, int col) {
         return new PlayerStats.Stats.Period(
             duration(rows, col),
-            number(rows, "blocks walked", col),
-            number(rows, "blocks flown", col),
+            number(rows, "distance walked", col),
+            number(rows, "distance flown", col),
             number(rows, "kills", col),
             number(rows, "deaths", col),
             number(rows, "jumps", col),
@@ -185,7 +185,7 @@ public class FetchStats {
      * "2,966km" -> 2966, "1,524" -> 1524; missing/unparseable -> 0.
      */
     private static int number(Map<String, List<String>> rows, String label, int col) {
-        String cleaned = cell(rows, label, col).replaceAll("[^0-9.]", "");
+        String cleaned = cell(rows, label, col).replaceAll("[^0-9]", "");
         if (cleaned.isEmpty()) return 0;
         try {
             return Integer.parseInt(cleaned);

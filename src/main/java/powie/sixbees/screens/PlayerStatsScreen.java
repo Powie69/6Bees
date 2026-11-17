@@ -5,6 +5,7 @@ import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.containers.WSection;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import powie.sixbees.utils.stats.PlayerStats;
 import powie.sixbees.utils.stats.PlayerStats.Stats.Period;
@@ -54,7 +55,9 @@ public class PlayerStatsScreen extends WindowScreen {
 
         WHorizontalList footer = add(theme.horizontalList()).expandX().widget();
         footer.add(theme.label("6Bees Addon").color(new Color(255, 206, 43))).padLeft(6);
-        footer.add(theme.label("Press ESC to close")).expandCellX().right();
+        WButton closeButton = footer.add(theme.button("close")).expandCellX().right().widget();
+        closeButton.tooltip = "Or Press ESC to close";
+        closeButton.action = () -> mc.gui.setScreen(null);
     }
 
     private void fillInfoTable(WTable table, String errorText) {
@@ -89,8 +92,8 @@ public class PlayerStatsScreen extends WindowScreen {
         List<Period> periods = List.of(stats.last7Days(), stats.last30Days(), stats.allTime());
 
         addRow(table, "Playtime", periods, Period::prettyPlaytime);
-        addNumberRow(table, "Blocks Walked (km)", periods, Period::blocksWalkedKm);
-        addNumberRow(table, "Blocks Flown (km)", periods, Period::blocksFlownKm);
+        addNumberRow(table, "Distance Walked (km)", periods, Period::blocksWalkedKm);
+        addNumberRow(table, "Distance Flown (km)", periods, Period::blocksFlownKm);
         addNumberRow(table, "Kills", periods, Period::kills);
         addNumberRow(table, "Deaths", periods, Period::deaths);
         addNumberRow(table, "Jumps", periods, Period::jumps);

@@ -46,6 +46,11 @@ public class AdBlock extends Module {
      * @see <a href="https://regex101.com/r/QNPk9U/1">Source</a>
      */
     private final Pattern discordLinkPattern = Pattern.compile("(https://)?(www\\.)?(((discord(app)?)?\\.com/invite)|((discord(app)?)?\\.gg))/(?<invite>.+)");
+    private final List<String> startsWithRules = List.of(
+        "---------------------------",
+        "Please add your email ",
+        "▬▬▬▬▬▬▬▬▬▬ 6b6t »"
+    );
 
     public AdBlock() {
         super(SixBees.CATEGORY, "ad-block", "Blocks ads in various mediums");
@@ -63,9 +68,11 @@ public class AdBlock extends Module {
         String message = event.getMessage().getString();
 
         if (filterChat.get()) {
-            if (message.startsWith("---------------------------") || message.startsWith("Please add your email ")) {
-                event.cancel();
-                return;
+            for (String rule : startsWithRules) {
+                if (message.startsWith(rule)) {
+                    event.cancel();
+                    return;
+                }
             }
         }
 
