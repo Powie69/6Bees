@@ -36,7 +36,7 @@ public class AutoLogin extends Module {
         .build()
     );
 
-    private final Pattern prompt = Pattern.compile("[\\w.-]+, please login with the command: /login <password>");
+    private final Pattern prompt = Pattern.compile("👋 Welcome to 6b6t, \\w+!");
 
     /**
      * Not added by default because every addon has this ngl

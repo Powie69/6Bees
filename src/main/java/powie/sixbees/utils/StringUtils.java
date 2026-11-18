@@ -1,6 +1,7 @@
 package powie.sixbees.utils;
 
 public class StringUtils {
+    // TODO: return record class for player messages (when needed. this is ok for now)
     public static String parsePlayerMessage(String message) {
         return message.substring(message.indexOf("»") + 1).trim();
     }

@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.SwingMode;
-import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -25,8 +24,6 @@ import powie.sixbees.SixBees;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class DoubleEchest extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

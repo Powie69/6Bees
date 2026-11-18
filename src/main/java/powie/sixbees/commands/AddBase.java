@@ -15,7 +15,7 @@ public class AddBase extends Command {
     public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder.executes(_ -> {
             Utils.screenToOpen = new AddBaseScreen(null);
-            return SINGLE_SUCCESS; // TODO: chat feedback on successful creation
+            return SINGLE_SUCCESS;
         });
     }
 }

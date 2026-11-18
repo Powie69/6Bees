@@ -44,6 +44,7 @@ public class PlayerStatsScreen extends WindowScreen {
         PlayerStats.getStatsAsync(username).thenAccept(Stats -> { // TODO: Test if mc.execute matters
             mc.execute(() -> {
                 infoTable.clear();
+//                infoTable.visible = false;
                 fillOverviewTable(overviewTable, Stats);
                 fillMoreTable(moreTable, Stats);
             });
@@ -55,7 +56,7 @@ public class PlayerStatsScreen extends WindowScreen {
 
         WHorizontalList footer = add(theme.horizontalList()).expandX().widget();
         footer.add(theme.label("6Bees Addon").color(new Color(255, 206, 43))).padLeft(6);
-        WButton closeButton = footer.add(theme.button("close")).expandCellX().right().widget();
+        WButton closeButton = footer.add(theme.button("Close")).expandCellX().right().widget();
         closeButton.tooltip = "Or Press ESC to close";
         closeButton.action = () -> mc.gui.setScreen(null);
     }
@@ -69,6 +70,7 @@ public class PlayerStatsScreen extends WindowScreen {
 
     private void fillOverviewTable(WTable table, PlayerStats.Stats stats) {
         table.clear();
+        table.visible = true;
         table.add(theme.label("Playtime: " + stats.allTime().prettyPlaytime()));
         table.row();
         table.add(theme.label("Join Date: " + stats.prettyMemberSince()));

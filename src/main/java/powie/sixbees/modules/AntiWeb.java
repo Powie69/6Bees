@@ -18,10 +18,10 @@ public class AntiWeb extends Module {
         if (event.state.getBlock() == Blocks.COBWEB
             && (mc.player.fallDistance <= 0 || mc.player.isFallFlying())
             && !mc.level.getBlockState(mc.player.blockPosition()).is(Blocks.COBWEB)
-            && !mc.level.getBlockState(mc.player.blockPosition().above()).is(Blocks.COBWEB)
+            && (!mc.level.getBlockState(mc.player.blockPosition().above()).is(Blocks.COBWEB))
+//            && !mc.level.getBlockState(BlockPos.containing(mc.player.getEyePosition())).is(Blocks.COBWEB)
         ) {
             event.shape = Shapes.block();
         }
     }
 }
-
