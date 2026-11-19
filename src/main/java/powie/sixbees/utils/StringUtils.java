@@ -1,3 +1,12 @@
+/*
+ * Copyright (C) 2026 Powie69
+ * This file is part of 6Bees.
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * Please provide attribution when using or redistributing this code.
+ * Derivative works must remain under the same license.
+ */
+
 package powie.sixbees.utils;
 
 public class StringUtils {

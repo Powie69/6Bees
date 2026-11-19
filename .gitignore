@@ -11,10 +11,13 @@ classes/
 
 # idea
 
-.idea/
 *.iml
 *.ipr
 *.iws
+.idea/*
+!.idea/.gitignore
+!.idea/copyright
+!.idea/dictionaries/
 
 # vscode
 
