@@ -19,9 +19,7 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import powie.sixbees.SixBees;
@@ -187,8 +185,6 @@ public class EFly extends Module {
 
     @Override
     public void onActivate() {
-        Player player = mc.player;
-
         atMaxSpeed = false;
         accelerationDelayTicks = 0;
         lastGlidePos = null;
@@ -199,9 +195,7 @@ public class EFly extends Module {
 
         // Carry over real horizontal speed instead of snapping back to the minimum, so turning the
         // module on while already moving picks the ramp up from wherever you actually were
-        double currentHorizontalSpeed = player != null
-            ? Math.hypot(player.getDeltaMovement().x(), player.getDeltaMovement().z())
-            : 0;
+        double currentHorizontalSpeed = Math.hypot(mc.player.getDeltaMovement().x(), mc.player.getDeltaMovement().z());
         acceleration = Math.max(startSpeed.get(), Math.min(currentHorizontalSpeed, horizontalSpeed.get()));
         if (acceleration >= horizontalSpeed.get()) atMaxSpeed = true;
 
@@ -210,10 +204,9 @@ public class EFly extends Module {
 
     // ------------------------------------------------------------- Flight tick
 
-    @SuppressWarnings("unused") // called by the event bus
     @EventHandler
     private void onPlayerMove(PlayerMoveEvent event) {
-        if (!mc.player.getItemBySlot(EquipmentSlot.CHEST).has(DataComponents.GLIDER)) return;
+//        if (!mc.player.getItemBySlot(EquipmentSlot.CHEST).has(DataComponents.GLIDER)) return;
 
         if (!mc.player.isFallFlying()) {
             lastGlidePos = null;
@@ -225,7 +218,7 @@ public class EFly extends Module {
         velZ = 0;
         velY = event.movement.y();
 
-        // The * 0.1 here is cancelled by the * 10 in handleHorizontalSpeed()
+        // The * 0.1 here is canceled by the * 10 in handleHorizontalSpeed()
         forward = Vec3.directionFromRotation(0, mc.player.getYRot()).scale(0.1);
         right = Vec3.directionFromRotation(0, mc.player.getYRot() + 90).scale(0.1);
 
@@ -247,7 +240,6 @@ public class EFly extends Module {
 
         lastGlidePos = mc.player.position();
         lastGlideIntendedSpeed = Math.hypot(velX, velZ);
-
     }
 
     @SuppressWarnings("unused") // called by the event bus
@@ -266,21 +258,26 @@ public class EFly extends Module {
             return;
         }
         // The correction goes through, but only costs RUBBERBAND_REWIND_TICKS worth of ramp
-        double keptSpeed = rewindSpeedFor(acceleration, accelerationStep.get(), accelerationPlateau.get(),
-            startSpeed.get(), RUBBERBAND_REWIND_TICKS);
+        double keptSpeed = rewindSpeedFor(
+            acceleration,
+            accelerationStep.get(),
+            accelerationPlateau.get(),
+            startSpeed.get());
 
         if (keptSpeed < acceleration) {
             acceleration = keptSpeed;
             atMaxSpeed = false;
             accelerationDelayTicks = 0;
 
-            verticalAcceleration = rewindSpeedFor(verticalAcceleration, verticalAccelerationStep.get(),
-                verticalAccelerationPlateau.get(), verticalStartSpeed.get(), RUBBERBAND_REWIND_TICKS);
+            verticalAcceleration = rewindSpeedFor(
+                verticalAcceleration,
+                verticalAccelerationStep.get(),
+                verticalAccelerationPlateau.get(),
+                verticalStartSpeed.get()
+            );
             atMaxVerticalSpeed = false;
             verticalAccelerationDelayTicks = 0;
         }
-        return;
-
     }
 
     // ------------------------------------------------- Horizontal acceleration
@@ -430,9 +427,9 @@ public class EFly extends Module {
      * Rewinds currentSpeed back along the curve by a number of ticks. Each tick's loss is
      * recomputed from the speed reached so far, mirroring how it was climbed forward.
      */
-    private static double rewindSpeedFor(double currentSpeed, double step, double plateau, double floor, int ticks) {
+    private static double rewindSpeedFor(double currentSpeed, double step, double plateau, double floor) {
         double speed = currentSpeed;
-        for (int i = 0; i < ticks && speed > floor; i++) {
+        for (int i = 0; i < EFly.RUBBERBAND_REWIND_TICKS && speed > floor; i++) {
             speed = Math.max(floor, speed - curveGain(speed, step, plateau));
         }
         return speed;
@@ -509,7 +506,7 @@ public class EFly extends Module {
             // camera keeps smoothing across the whole distance flown this game tick
             double savedVelocityY = mc.player.getDeltaMovement().y();
             overdriveExtraTick = true;
-            try {
+            try { // why is this inside a try catch?
                 mc.player.tickCount++;
                 mc.player.tick();
                 // The position packet is sent from sendChanges(), which the game only calls once per
