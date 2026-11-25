@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 public class FetchStats {
     private static final String BASE_URL = "https://www.6b6t.org/stats/";
 
-    private static final DateTimeFormatter MEMBER_SINCE_FORMAT = DateTimeFormatter.ofPattern("M/d/uuuu", Locale.US);
+    private static final DateTimeFormatter MEMBER_SINCE_FORMAT = DateTimeFormatter.ofPattern("MMM d, uuuu", Locale.US);
 
     public static final ExecutorService EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
     private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
@@ -47,8 +47,8 @@ public class FetchStats {
     private static final Pattern ROW_PATTERN = Pattern.compile("<tr\\b[^>]*>(.*?)</tr\\s*>", REGEX_FLAGS);
     private static final Pattern CELL_PATTERN = Pattern.compile("<t[hd]\\b[^>]*>(.*?)</t[hd]\\s*>", REGEX_FLAGS);
     // "Member since" followed by (optional tags / whitespace / comments) and then the date
-    private static final Pattern MEMBER_SINCE_PATTERN = Pattern.compile(
-        "Member\\s+since(?:\\s|&nbsp;|<[^>]*>)*?(\\d{1,2}/\\d{1,2}/\\d{4})", REGEX_FLAGS);
+    private static final Pattern MEMBER_SINCE_PATTERN = Pattern.compile("Member\\s+since(.{0,200})", REGEX_FLAGS);
+    private static final Pattern DATE_PATTERN = Pattern.compile("([A-Za-z]{3})[A-Za-z]*\\.?\\s+(\\d{1,2}),\\s*(\\d{4})");
     private static final Pattern COMMENT_PATTERN = Pattern.compile("<!--.*?-->", Pattern.DOTALL);
     private static final Pattern TAG_PATTERN = Pattern.compile("<[^>]*>", Pattern.DOTALL);
     private static final Pattern ENTITY_PATTERN = Pattern.compile("&(#x[0-9a-fA-F]+|#\\d+|[a-zA-Z]+);");
@@ -157,8 +157,10 @@ public class FetchStats {
     private static LocalDate parseMemberSince(String html) {
         Matcher m = MEMBER_SINCE_PATTERN.matcher(html);
         if (!m.find()) return null;
+        Matcher d = DATE_PATTERN.matcher(text(m.group(1)));
+        if (!d.find()) return null;
         try {
-            return LocalDate.parse(m.group(1), MEMBER_SINCE_FORMAT);
+            return LocalDate.parse(d.group(1) + " " + d.group(2) + ", " + d.group(3), MEMBER_SINCE_FORMAT);
         } catch (DateTimeException e) {
             return null;
         }
@@ -187,6 +189,14 @@ public class FetchStats {
 
     private static String cell(Map<String, List<String>> rows, String label, int col) {
         List<String> values = rows.get(label);
+        if (values == null) {
+            for (Map.Entry<String, List<String>> e : rows.entrySet()) {
+                if (e.getKey().startsWith(label)) {
+                    values = e.getValue();
+                    break;
+                }
+            }
+        }
         return values == null ? "" : values.get(col);
     }
 
