@@ -19,7 +19,9 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import powie.sixbees.SixBees;
@@ -46,7 +48,7 @@ public class EFly extends Module {
 
     // ---------------------------------------------------------------- Settings
 
-    public final Setting<Double> startSpeed = sgGeneral.add(new DoubleSetting.Builder()
+    public final Setting<Double> minimumHorizontalSpeed = sgGeneral.add(new DoubleSetting.Builder()
         .name("minimum-horizontal-speed")
         .description("The speed you start at when moving horizontally (before acceleration starts)")
         .min(0)
@@ -54,7 +56,7 @@ public class EFly extends Module {
         .build()
     );
 
-    public final Setting<Double> horizontalSpeed = sgGeneral.add(new DoubleSetting.Builder()
+    public final Setting<Double> maximumHorizontalSpeed = sgGeneral.add(new DoubleSetting.Builder()
         .name("maximum-horizontal-speed")
         .description("The fastest horizontal speed will go (blocks per tick)")
         .defaultValue(14.999)
@@ -153,13 +155,13 @@ public class EFly extends Module {
 
     // ------------------------------------------------------------------- State
 
-    // Horizontal: despite the name this holds the CURRENT TARGET SPEED (blocks per tick), not an acceleration
-    private double acceleration;
+    // Horizontal: despite the name this holds the CURRENT TARGET SPEED (blocks per tick), not an acceleration // old comment
+    private double currentHorizontalSpeed;
     private boolean atMaxSpeed;
     private int accelerationDelayTicks;
 
     // Vertical: same idea
-    private double verticalAcceleration;
+    private double currentVerticalSpeed;
     private boolean atMaxVerticalSpeed;
     private int verticalAccelerationDelayTicks;
 
@@ -195,9 +197,9 @@ public class EFly extends Module {
 
         // Carry over real horizontal speed instead of snapping back to the minimum, so turning the
         // module on while already moving picks the ramp up from wherever you actually were
-        double currentHorizontalSpeed = Math.hypot(mc.player.getDeltaMovement().x(), mc.player.getDeltaMovement().z());
-        acceleration = Math.max(startSpeed.get(), Math.min(currentHorizontalSpeed, horizontalSpeed.get()));
-        if (acceleration >= horizontalSpeed.get()) atMaxSpeed = true;
+        double measuredSpeed = Math.hypot(mc.player.getDeltaMovement().x(), mc.player.getDeltaMovement().z());
+        currentHorizontalSpeed = Math.clamp(measuredSpeed, minimumHorizontalSpeed.get(), maximumHorizontalSpeed.get());
+        if (currentHorizontalSpeed >= maximumHorizontalSpeed.get()) atMaxSpeed = true;
 
         resetVerticalAcceleration();
     }
@@ -206,7 +208,7 @@ public class EFly extends Module {
 
     @EventHandler
     private void onPlayerMove(PlayerMoveEvent event) {
-//        if (!mc.player.getItemBySlot(EquipmentSlot.CHEST).has(DataComponents.GLIDER)) return;
+        if (!mc.player.getItemBySlot(EquipmentSlot.CHEST).has(DataComponents.GLIDER)) return;
 
         if (!mc.player.isFallFlying()) {
             lastGlidePos = null;
@@ -259,18 +261,18 @@ public class EFly extends Module {
         }
         // The correction goes through, but only costs RUBBERBAND_REWIND_TICKS worth of ramp
         double keptSpeed = rewindSpeedFor(
-            acceleration,
+            currentHorizontalSpeed,
             accelerationStep.get(),
             accelerationPlateau.get(),
-            startSpeed.get());
+            minimumHorizontalSpeed.get());
 
-        if (keptSpeed < acceleration) {
-            acceleration = keptSpeed;
+        if (keptSpeed < currentHorizontalSpeed) {
+            currentHorizontalSpeed = keptSpeed;
             atMaxSpeed = false;
             accelerationDelayTicks = 0;
 
-            verticalAcceleration = rewindSpeedFor(
-                verticalAcceleration,
+            currentVerticalSpeed = rewindSpeedFor(
+                currentVerticalSpeed,
                 verticalAccelerationStep.get(),
                 verticalAccelerationPlateau.get(),
                 verticalStartSpeed.get()
@@ -299,41 +301,35 @@ public class EFly extends Module {
 
         // Gain per tick is steep at low speed and tapers toward zero as speed approaches the plateau.
         // The real top speed is still maximum-horizontal-speed; the curve only shapes how you get there
-        double cap = horizontalSpeed.get();
-        acceleration = nextSpeedFor(acceleration, accelerationStep.get(), accelerationPlateau.get(), cap);
+        double cap = maximumHorizontalSpeed.get();
+        currentHorizontalSpeed = nextSpeedFor(
+            currentHorizontalSpeed,
+            accelerationStep.get(),
+            accelerationPlateau.get(),
+            cap);
 
-        if (acceleration >= horizontalSpeed.get()) atMaxSpeed = true;
+        if (currentHorizontalSpeed >= maximumHorizontalSpeed.get()) atMaxSpeed = true;
     }
 
     /**
      * Turns the current ramp speed into this tick's horizontal velocity from the held keys.
      */
     private void handleHorizontalSpeed() {
-        boolean a = false;
-        boolean b = false;
+        // Opposing keys cancel out per axis (A+D = no lateral, W+S = no forward)
+        int forwardAmt = (mc.options.keyUp.isDown() ? 1 : 0) - (mc.options.keyDown.isDown() ? 1 : 0);
+        int rightAmt = (mc.options.keyRight.isDown() ? 1 : 0) - (mc.options.keyLeft.isDown() ? 1 : 0);
 
-        if (mc.options.keyUp.isDown()) {
-            velX += forward.x() * acceleration * 10;
-            velZ += forward.z() * acceleration * 10;
-            a = true;
-        } else if (mc.options.keyDown.isDown()) {
-            velX -= forward.x() * acceleration * 10;
-            velZ -= forward.z() * acceleration * 10;
-            a = true;
+        if (forwardAmt != 0) {
+            velX += forward.x() * currentHorizontalSpeed * 10 * forwardAmt;
+            velZ += forward.z() * currentHorizontalSpeed * 10 * forwardAmt;
+        }
+        if (rightAmt != 0) {
+            velX += right.x() * currentHorizontalSpeed * 10 * rightAmt;
+            velZ += right.z() * currentHorizontalSpeed * 10 * rightAmt;
         }
 
-        if (mc.options.keyRight.isDown()) {
-            velX += right.x() * acceleration * 10;
-            velZ += right.z() * acceleration * 10;
-            b = true;
-        } else if (mc.options.keyLeft.isDown()) {
-            velX -= right.x() * acceleration * 10;
-            velZ -= right.z() * acceleration * 10;
-            b = true;
-        }
-
-        // Holding two directions at once would be faster than one, so scale it back down
-        if (a && b) {
+        // Moving diagonally would be faster than moving in one direction, so scale it back down
+        if (forwardAmt != 0 && rightAmt != 0) {
             double diagonal = 1 / Math.sqrt(2);
             velX *= diagonal;
             velZ *= diagonal;
@@ -354,9 +350,9 @@ public class EFly extends Module {
         // Any real loss of speed counts (head-on or glancing), only float noise is ignored
         if (moved >= lastGlideIntendedSpeed - 1.0E-3) return;
 
-        double kept = Math.max(startSpeed.get(), moved);
-        if (kept < acceleration) acceleration = kept;
-        atMaxSpeed = acceleration >= horizontalSpeed.get();
+        double kept = Math.max(minimumHorizontalSpeed.get(), moved);
+        if (kept < currentHorizontalSpeed) currentHorizontalSpeed = kept;
+        atMaxSpeed = currentHorizontalSpeed >= maximumHorizontalSpeed.get();
         accelerationDelayTicks = 0;
     }
 
@@ -387,15 +383,15 @@ public class EFly extends Module {
             return;
         }
 
-        verticalAcceleration = nextSpeedFor(verticalAcceleration, verticalAccelerationStep.get(),
+        currentVerticalSpeed = nextSpeedFor(currentVerticalSpeed, verticalAccelerationStep.get(),
             verticalAccelerationPlateau.get(), verticalSpeed.get());
 
-        if (verticalAcceleration >= verticalSpeed.get()) atMaxVerticalSpeed = true;
+        if (currentVerticalSpeed >= verticalSpeed.get()) atMaxVerticalSpeed = true;
     }
 
     private void handleVerticalSpeed() {
-        if (mc.options.keyJump.isDown()) velY += 0.5 * verticalAcceleration;
-        else if (mc.options.keyShift.isDown()) velY -= 0.5 * verticalAcceleration;
+        if (mc.options.keyJump.isDown()) velY += 0.5 * currentVerticalSpeed;
+        else if (mc.options.keyShift.isDown()) velY -= 0.5 * currentVerticalSpeed;
     }
 
     private void handleFallMultiplier() {
@@ -445,18 +441,19 @@ public class EFly extends Module {
     private void resetHorizontalAcceleration() {
         atMaxSpeed = false;
         accelerationDelayTicks = 0;
-        acceleration = startSpeed.get();
+        currentHorizontalSpeed = minimumHorizontalSpeed.get();
     }
 
     private void resetVerticalAcceleration() {
         atMaxVerticalSpeed = false;
         verticalAccelerationDelayTicks = 0;
-        verticalAcceleration = verticalStartSpeed.get();
+        currentVerticalSpeed = verticalStartSpeed.get();
     }
 
     private boolean noMovementKeyPressed() {
-        return !(mc.options.keyUp.isDown() || mc.options.keyDown.isDown()
-            || mc.options.keyLeft.isDown() || mc.options.keyRight.isDown());
+        boolean forward = mc.options.keyUp.isDown() != mc.options.keyDown.isDown();
+        boolean right = mc.options.keyRight.isDown() != mc.options.keyLeft.isDown();
+        return !forward && !right;
     }
 
     // --------------------------------------------------------------- Overdrive
@@ -481,7 +478,7 @@ public class EFly extends Module {
         overdriveCarry -= extraTicks;
 
         // Real-time speed budget: how far the player has gone this game tick must never pass top speed
-        double budget = horizontalSpeed.get();
+        double budget = maximumHorizontalSpeed.get();
         double movedThisGameTick = lastGlideIntendedSpeed;
 
         // Singleplayer: the integrated server kicks the player for sending a second position packet
@@ -492,11 +489,11 @@ public class EFly extends Module {
             if (isHorizontalRampStalled(mc.player)) {
                 overdriveCarry = 0;
                 // The ramp topped out during the extra ticks: Overdrive has done all it can
-                if (acceleration >= horizontalSpeed.get() * OVERDRIVE_OFF_FRACTION) overdriveSpent = true;
+                if (currentHorizontalSpeed >= maximumHorizontalSpeed.get() * OVERDRIVE_OFF_FRACTION) overdriveSpent = true;
                 break;
             }
 
-            double nextTickSpeed = nextSpeedFor(acceleration, accelerationStep.get(), accelerationPlateau.get(), budget);
+            double nextTickSpeed = nextSpeedFor(currentHorizontalSpeed, accelerationStep.get(), accelerationPlateau.get(), budget);
             if (movedThisGameTick + nextTickSpeed > budget) {
                 overdriveCarry = 0;
                 break;
@@ -536,10 +533,10 @@ public class EFly extends Module {
             return;
         }
 
-        double top = horizontalSpeed.get();
+        double top = maximumHorizontalSpeed.get();
 
-        if (acceleration <= OVERDRIVE_REARM_SPEED) overdriveSpent = false;
-        else if (top > 0 && acceleration >= top * OVERDRIVE_OFF_FRACTION) overdriveSpent = true;
+        if (currentHorizontalSpeed <= OVERDRIVE_REARM_SPEED) overdriveSpent = false;
+        else if (top > 0 && currentHorizontalSpeed >= top * OVERDRIVE_OFF_FRACTION) overdriveSpent = true;
     }
 
     /**
@@ -551,7 +548,7 @@ public class EFly extends Module {
         if (overdriveSpent) return true;
         if (atMaxSpeed) return true;
         if (accelerationDelayTicks < ACCELERATION_DELAY_TICKS) return true;
-        return acceleration >= horizontalSpeed.get() * OVERDRIVE_OFF_FRACTION;
+        return currentHorizontalSpeed >= maximumHorizontalSpeed.get() * OVERDRIVE_OFF_FRACTION;
     }
 
     /**
