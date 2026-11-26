@@ -15,6 +15,8 @@ import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.world.EChestFarmer;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -53,8 +55,15 @@ public class DoubleEchest extends Module {
 
     private final Setting<ActiveWhen> activeWhen = sgGeneral.add(new EnumSetting.Builder<ActiveWhen>()
         .name("active-when")
-        .description("is only active when you meet these requirements.")
+        .description("Is only active when you meet these requirements.")
         .defaultValue(ActiveWhen.Always)
+        .build()
+    );
+
+    private final Setting<Boolean> notWhenEchestFarmer = sgGeneral.add(new BoolSetting.Builder()
+        .name("not-when-echest-farmer")
+        .description("Does not place the extra ender chest when the E-Chest Farmer module is enabled.")
+        .defaultValue(true)
         .build()
     );
 
@@ -82,6 +91,8 @@ public class DoubleEchest extends Module {
             autoPlacedPositions.remove(blockPos);
             return;
         }
+
+        if (notWhenEchestFarmer.get() && Modules.get().get(EChestFarmer.class).isActive()) return;
 
         if ((activeWhen.get() == ActiveWhen.Sneaking && !mc.player.isShiftKeyDown())
             || (activeWhen.get() == ActiveWhen.NotSneaking && mc.player.isShiftKeyDown())) {
