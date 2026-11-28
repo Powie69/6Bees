@@ -101,6 +101,7 @@ public class BaseTab extends Tab {
         }
     }
 
+    // TODO: fix bug where pressing ESC doesn't return to parent window on some cases.
     public static class AddBaseScreen extends WindowScreen {
         private final AddBaseSettings settings = new AddBaseSettings();
         private final boolean isEdit;
@@ -117,7 +118,7 @@ public class BaseTab extends Tab {
             base = null;
             baseId = UUID.randomUUID().toString();
             this.parentWindow = parentWindow;
-            parent = null;
+            parent = null; // This is so `.add-base` won't stay open when this screen closes
         }
 
         /**
