@@ -11,6 +11,7 @@ package powie.sixbees.modules;
 
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -55,6 +56,9 @@ public class TpTweaks extends Module {
 
     // there inst even a message that says your request expired
     private boolean blockNextCancelMessage;
+    private String pendingTpaCommand;
+    private boolean pendingTpaCancelSent;
+    private boolean resendingTpa;
 
     public TpTweaks() {
         super(SixBees.CATEGORY, "tp-tweaks", "TP related utilities");
@@ -63,6 +67,8 @@ public class TpTweaks extends Module {
     @Override
     public void onDeactivate() {
         blockNextCancelMessage = false;
+        pendingTpaCommand = null;
+        pendingTpaCancelSent = false;
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -78,20 +84,40 @@ public class TpTweaks extends Module {
 
     /**
      * SendCommandEvent not used here for what I assume to be race condition issues.<br>
-     * If y'all know why SendCommandEvent doesn't work please let me know.
+     * If y'all know why SendCommandEvent doesn't work please let me know.<br><br>
      *
+     * also there's still some desync issues (tpa getting canceled after tpa'ing to correct player)
+     * hopefully this fixes it
      * @author Powie69
      */
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
+        if (resendingTpa) return;
         if (!(event.packet instanceof ServerboundChatCommandPacket(String command))) return;
-        handleRequestSent(command);
+        if (!autoCancelPreviousTpa.get() || !command.startsWith("tpa")) return;
+
+        event.cancel();
+        pendingTpaCommand = command;
+        pendingTpaCancelSent = false;
     }
 
-    private void handleRequestSent(String command) {
-        if (!autoCancelPreviousTpa.get() || !command.startsWith("tpa")) return;
-        ChatUtils.sendPlayerMsg("/tpcancel", false);
-        blockNextCancelMessage = true;
+    @EventHandler
+    private void onTick(TickEvent.Post event) {
+        if (pendingTpaCommand == null) return;
+
+        if (!pendingTpaCancelSent) {
+            pendingTpaCancelSent = true;
+            blockNextCancelMessage = true;
+            ChatUtils.sendPlayerMsg("/tpcancel", false);
+            return;
+        }
+
+        String command = pendingTpaCommand;
+        pendingTpaCommand = null;
+        pendingTpaCancelSent = false;
+        resendingTpa = true;
+        ChatUtils.sendPlayerMsg("/" + command, false);
+        resendingTpa = false;
     }
 
     private boolean blockCancelMessage(String message) {

@@ -21,6 +21,8 @@ import powie.sixbees.SixBees;
 
 import java.util.regex.Pattern;
 
+import static powie.sixbees.utils.Checks.is6B6T;
+
 public class AutoLogin extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -51,12 +53,13 @@ public class AutoLogin extends Module {
      * Not added by default because every addon has this ngl
      */
     public AutoLogin() {
-        super(SixBees.CATEGORY, "auto-login", "Runs /login command when you join a server.");
+        super(SixBees.CATEGORY, "auto-login", "Runs /login command when you join 6b6t.");
     }
 
     @EventHandler
     private void onMessageReceived(ReceiveMessageEvent event) {
         if (mc.hasSingleplayerServer()) return;
+        if (!is6B6T()) return;
         if (password.get().trim().isEmpty()) return;
         if (prompt.matcher(event.getMessage().getString()).matches()) {
             ChatUtils.sendPlayerMsg(command.get() + " " + password.get(), false);
