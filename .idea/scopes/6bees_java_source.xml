@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="6bees java source" pattern="file:src//*.java" />
+</component>
